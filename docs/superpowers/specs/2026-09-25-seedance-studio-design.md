@@ -73,8 +73,9 @@ Edit/extend: source video counts toward the 10-video limit; total media ≤50.
 ```
 browser ──► Next.js pages (Studio, Gallery, Login)
    │
-   ├─► /api/uploads ──► lib/higgsfield.generateUploadUrl ──► Higgsfield
-   │      (browser then PUTs file straight to upload_url)
+   ├─► /api/uploads (multipart) ──► lib/higgsfield.uploadFile
+   │      (server gets upload_url, PUTs the file, returns public_url;
+   │       proxied server-side to avoid storage-bucket CORS issues)
    ├─► /api/jobs (POST) ──► lib/schemas (Zod) ──► lib/higgsfield.submit ──► db
    ├─► /api/jobs (GET list)  ──► db
    ├─► /api/jobs/:id (GET) ──► lib/jobs.refresh ──► higgsfield.status
@@ -87,7 +88,7 @@ browser ──► Next.js pages (Studio, Gallery, Login)
 
 - **`lib/higgsfield.ts`** — the only module that talks to Higgsfield.
   `submit(mode, input)`, `getStatus(statusUrl)`, `cancel(cancelUrl)`,
-  `generateUploadUrl(contentType)`. Throws `HiggsfieldError { status, message }`.
+  `generateUploadUrl(contentType)`, `uploadFile(blob, contentType)`. Throws `HiggsfieldError { status, message }`.
   Takes `fetch` as an injectable dependency for tests.
 - **`lib/schemas.ts`** — one Zod schema per mode encoding the table above;
   `parseJobInput(mode, body)` returns the exact payload sent to Higgsfield.
@@ -99,7 +100,7 @@ browser ──► Next.js pages (Studio, Gallery, Login)
   (gitignored), writing to a temp file and renaming on success.
 - **`lib/auth.ts`** — sign and verify an HMAC session cookie (`httpOnly`,
   `sameSite=lax`, 30 days); constant-time password compare.
-- **`middleware.ts`** — redirects unauthenticated pages to `/login`, returns
+- **`proxy.ts`** (Next.js 16's replacement for `middleware.ts`) — redirects unauthenticated pages to `/login`, returns
   401 for `/api/*` (except `/api/login`).
 
 ### Data model
