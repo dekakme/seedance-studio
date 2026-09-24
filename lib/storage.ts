@@ -4,7 +4,8 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 
-export const VIDEO_DIR = path.join(process.cwd(), "storage", "videos");
+// runtime data folder, not a source dependency: keep it out of Turbopack's file tracing
+export const VIDEO_DIR = path.join(/* turbopackIgnore: true */ process.cwd(), "storage", "videos");
 
 const SAFE_NAME = /^[\w-]+\.(mp4|mov)$/;
 

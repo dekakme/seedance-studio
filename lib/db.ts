@@ -36,7 +36,7 @@ export function openDb(file: string): Db {
 let shared: Db | null = null;
 
 export function getDb(): Db {
-  shared ??= openDb(process.env.DB_PATH ?? path.join(process.cwd(), "data", "app.db"));
+  shared ??= openDb(process.env.DB_PATH ?? path.join(/* turbopackIgnore: true */ process.cwd(), "data", "app.db"));
   return shared;
 }
 
