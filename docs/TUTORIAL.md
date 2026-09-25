@@ -4,6 +4,8 @@ Seedance Studio adalah web app pribadi untuk membuat video AI lewat [Higgsfield 
 App ini mendukung Seedance 2.5, Kling 3.0, Higgsfield Genjutsu, MiniMax H3, dan semua model video lain di
 Higgsfield (66 endpoint). App berjalan di komputer Anda sendiri dan dikunci dengan satu password.
 
+![Tampilan Seedance Studio](screenshot.webp)
+
 > ⚠️ Setiap video yang dibuat **memotong kredit Higgsfield Anda**. Perkiraan biaya tampil di tombol Generate,
 > jadi selalu cek sebelum menekannya.
 
