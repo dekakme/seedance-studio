@@ -10,6 +10,16 @@ Private web app for generating videos through the [Higgsfield API](https://docs.
 - **Higgsfield Genjutsu**: Motion Transfer (new character/style on an existing video's motion) and
   Object Swap (replace objects in a video), each with 1–8 reference images
 
+- **Every other Higgsfield video model** (66 endpoints in total, e.g. Kling 2.5/2.6/O3/Omni and Motion
+  Control, Seedance 2.0, Wan 2.6/2.7/3.0, Happy Horse, Cinema Studio, LTX-2.5, Hailuo 2.3, PixVerse V6,
+  Grok Imagine). Pick one under **Model**, and the form is generated from its published JSON schema.
+
+The model catalog lives in `lib/catalog.json`. Refresh it when Higgsfield adds models:
+
+```bash
+npm run sync-models
+```
+
 Video uploads open a trim dialog. The server cuts the chosen range with ffmpeg (`ffmpeg-static`) before
 sending it to Higgsfield, which also lowers the cost of input-video-priced models. Click any reference
 thumbnail to preview it full size.
