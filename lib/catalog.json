@@ -1,0 +1,4802 @@
+[
+  {
+    "id": "higgsfield/genjutsu/motion-transfer/v1.0",
+    "family": "Genjutsu",
+    "name": "Genjutsu Motion Transfer",
+    "workflow": "V1.0",
+    "category": "video2video",
+    "description": "Transforms existing videos using image references for different characters, locations, and styles,",
+    "pricing": "Per-second pricing. Each second of input video costs $0.318 at 480p or $0.681 at 720p. Input duration is rounded up to the nearest whole second. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "title": "MotionTransferParams",
+      "required": [
+        "video_url",
+        "image_urls"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "default": "",
+          "maxLength": 10000
+        },
+        "video_url": {
+          "type": "string",
+          "title": "Video Url",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1
+          },
+          "title": "Image Urls",
+          "maxItems": 8,
+          "minItems": 1
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "480p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "higgsfield/genjutsu/object-swap/v1.0",
+    "family": "Genjutsu",
+    "name": "Genjutsu Object Swap",
+    "workflow": "V1.0",
+    "category": "video2video",
+    "description": "One video. Endless ways to reimagine it.",
+    "pricing": "Per-second pricing. Each second of input video costs $0.318 at 480p or $0.681 at 720p. Input duration is rounded up to the nearest whole second. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "title": "ObjectSwapParams",
+      "required": [
+        "video_url",
+        "image_urls"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "default": "",
+          "maxLength": 10000
+        },
+        "video_url": {
+          "type": "string",
+          "title": "Video Url",
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2083,
+            "minLength": 1
+          },
+          "title": "Image Urls",
+          "maxItems": 8,
+          "minItems": 1
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "480p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.0/text-to-video",
+    "family": "Seedance 2.0",
+    "name": "Seedance 2.0",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Creates 4K video from text or media references. Supports up to 15 seconds with optional sound.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil(generated video seconds × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. Per 1,000 video tokens: 480p/720p/1080p $0.014, 4K $0.008. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 4
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "21:9"
+          ],
+          "type": "string",
+          "default": "16:9"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.0/image-to-video",
+    "family": "Seedance 2.0",
+    "name": "Seedance 2.0",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Generate videos from text with controls for duration, resolution, aspect ratio, and optional audio. Create polished multi-shot stories for ads, social content, and cinematic scenes",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil(generated video seconds × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. Per 1,000 video tokens: 480p/720p/1080p $0.014, 4K $0.008. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 4
+        },
+        "image_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "end_image_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.0/reference-to-video",
+    "family": "Seedance 2.0",
+    "name": "Seedance 2.0",
+    "workflow": "Reference to video",
+    "category": "image2video, video2video",
+    "description": "Seedance 2.0 Reference to Video generates videos from images or existing videos, allowing customization of duration, resolution, aspect ratio, and audio inputs. It supports image-to-video and video-to-video transformations with optional audio generation.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil((input video seconds + generated video seconds) × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. Per 1,000 video tokens: without video input — 480p/720p/1080p $0.014, 4K $0.008; with video input — 480p/720p/1080p $0.0084, 4K $0.0048 (0.6× the standard rate). With video references, both input and generated video durations are billable. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "if": {
+        "required": [
+          "image_urls"
+        ]
+      },
+      "else": {
+        "required": [
+          "video_urls"
+        ]
+      },
+      "type": "object",
+      "required": [],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 4
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 3,
+          "minItems": 1
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 9,
+          "minItems": 1
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 3,
+          "minItems": 1
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "21:9"
+          ],
+          "type": "string",
+          "default": "16:9"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.5/text-to-video",
+    "family": "Seedance 2.5",
+    "name": "Seedance 2.5",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates videos from text, images, video, and audio references, with optional audio generation.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil((input video seconds + generated video seconds) × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. At 480p or 720p, each 1,000 video tokens cost $0.0214. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 4
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "21:9"
+          ],
+          "type": "string",
+          "default": "16:9"
+        },
+        "bitrate_mode": {
+          "enum": [
+            "standard",
+            "high"
+          ],
+          "type": "string",
+          "default": "high"
+        },
+        "output_format": {
+          "enum": [
+            "mp4",
+            "mov"
+          ],
+          "type": "string",
+          "default": "mp4"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.5/image-to-video",
+    "family": "Seedance 2.5",
+    "name": "Seedance 2.5",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Seedance 2.5 Image to Video generates videos from a single image URL with optional prompts, customizable duration, resolution, and output format. It supports adding an end image and generating audio to enhance the video output.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil((input video seconds + generated video seconds) × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. At 480p or 720p, each 1,000 video tokens cost $0.0214. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 4
+        },
+        "image_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "bitrate_mode": {
+          "enum": [
+            "standard",
+            "high"
+          ],
+          "type": "string",
+          "default": "high"
+        },
+        "end_image_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.5/reference-to-video",
+    "family": "Seedance 2.5",
+    "name": "Seedance 2.5",
+    "workflow": "Reference to video",
+    "category": "image2video, video2video",
+    "description": "Seedance 2.5 Reference to Video generates videos from images, videos, or audio inputs with customizable duration, resolution, aspect ratio, and output format. It supports image-to-video and video-to-video transformations, allowing creative control through prompts and audio integration.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil((input video seconds + generated video seconds) × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. At 480p or 720p, each 1,000 video tokens cost $0.0214 without video input or $0.01284 with video input (0.6× the standard rate). With video references, both input and generated video durations are billable. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "if": {
+        "required": [
+          "image_urls"
+        ]
+      },
+      "else": {
+        "if": {
+          "required": [
+            "video_urls"
+          ]
+        },
+        "else": {
+          "required": [
+            "audio_urls"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 4
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10,
+          "minItems": 1
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 30,
+          "minItems": 1
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10,
+          "minItems": 1
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "21:9"
+          ],
+          "type": "string",
+          "default": "16:9"
+        },
+        "bitrate_mode": {
+          "enum": [
+            "standard",
+            "high"
+          ],
+          "type": "string",
+          "default": "high"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.5/video-edit",
+    "family": "Seedance 2.5",
+    "name": "Seedance 2.5",
+    "workflow": "Video edit",
+    "category": "video2video",
+    "description": "Generate videos from text, images, video, and audio references, with clips up to 30 seconds.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil((input video seconds + generated video seconds) × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. Video input is required. At 480p or 720p, each 1,000 video tokens cost $0.01284. Both input and generated video durations are billable. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "required": [
+        "prompt",
+        "video_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "video_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10,
+          "minItems": 1
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 30,
+          "minItems": 1
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10,
+          "minItems": 1
+        },
+        "bitrate_mode": {
+          "enum": [
+            "standard",
+            "high"
+          ],
+          "type": "string",
+          "default": "high"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "bytedance/seedance-2.5/video-extend",
+    "family": "Seedance 2.5",
+    "name": "Seedance 2.5",
+    "workflow": "Video extend",
+    "category": "video2video",
+    "description": "Seedance 2.5 Video Extend generates extended video content from an input video URL and text prompt, supporting up to 30 seconds duration and optional audio or image inputs. It outputs videos in 480p or 720p resolution with mp4 or mov format, allowing control over audio generation and multiple media inputs.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil((input video seconds + generated video seconds) × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. Video input is required. At 480p or 720p, each 1,000 video tokens cost $0.01284. Both input and generated video durations are billable. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "required": [
+        "prompt",
+        "video_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 4
+        },
+        "video_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10,
+          "minItems": 1
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 30,
+          "minItems": 1
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10,
+          "minItems": 1
+        },
+        "bitrate_mode": {
+          "enum": [
+            "standard",
+            "high"
+          ],
+          "type": "string",
+          "default": "high"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "kling-video/v2.5-turbo/pro/text-to-video",
+    "family": "Kling 2.5 Turbo",
+    "name": "Kling 2.5 Turbo Pro",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Provides high-end text-to-video output featuring seamless movement, cinematic-quality imagery, and standout prompt fidelity",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 2.5 Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative Prompt",
+          "default": ""
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v2.5-turbo/pro/image-to-video",
+    "family": "Kling 2.5 Turbo",
+    "name": "Kling 2.5 Turbo Pro",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Kling 2.5 Turbo Pro converts a single image into a short video clip using a text prompt to guide the animation style. Users can specify video duration, CFG scale for prompt adherence, and provide negative prompts to refine output.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 2.5 Playground",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative Prompt",
+          "default": ""
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v2.5-turbo/standard/image-to-video",
+    "family": "Kling 2.5 Turbo",
+    "name": "Kling 2.5 Turbo Standard",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Generates videos from text prompts and images, with fast generation and precise prompt control.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 2.5 Playground",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative Prompt",
+          "default": ""
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v2.6/pro/text-to-video",
+    "family": "Kling 2.6",
+    "name": "Kling 2.6 Pro",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates videos and sound from text or images, including dialogue, sound effects and ambience.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 2.6 Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v2.6/pro/image-to-video",
+    "family": "Kling 2.6",
+    "name": "Kling 2.6 Pro",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Kling 2.6 Pro Image to Video generates short videos from a single image URL using a text prompt to guide the transformation. Users can customize video duration, aspect ratio, sound inclusion, and CFG scale to control creativity and output style.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 2.6 Playground",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "title": "Aspect ratio"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/motion-control/pro",
+    "family": "Kling 2.6 Motion Control",
+    "name": "Kling 2.6",
+    "workflow": "Pro",
+    "category": "image2video",
+    "description": "Kling 2.6 Motion Control (Pro) generates videos by animating a source image using the motion from a provided video. Users can control character orientation and choose to retain the original video's sound for customized video creation.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling Motion Control Playground",
+      "required": [
+        "image_url",
+        "video_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "default": "",
+          "description": "Write your prompt here"
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "video_url": {
+          "type": "string",
+          "title": "Video URL",
+          "format": "uri"
+        },
+        "keep_original_sound": {
+          "enum": [
+            "yes",
+            "no"
+          ],
+          "type": "string",
+          "title": "Keep original sound",
+          "default": "yes"
+        },
+        "character_orientation": {
+          "enum": [
+            "image",
+            "video"
+          ],
+          "type": "string",
+          "title": "Character orientation",
+          "default": "video",
+          "description": "Generate the orientation of the characters in the video, which can be selected to match the image or the video"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/motion-control/std",
+    "family": "Kling 2.6 Motion Control",
+    "name": "Kling 2.6",
+    "workflow": "Std",
+    "category": "image2video",
+    "description": "Kling 2.6 Motion Control (Standard) generates videos by animating a source image using motion from a reference video. Users provide an image URL and a video URL, with options to keep the original sound and align character orientation to either the image or video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling Motion Control Playground",
+      "required": [
+        "image_url",
+        "video_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "default": "",
+          "description": "Write your prompt here"
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "video_url": {
+          "type": "string",
+          "title": "Video URL",
+          "format": "uri"
+        },
+        "keep_original_sound": {
+          "enum": [
+            "yes",
+            "no"
+          ],
+          "type": "string",
+          "title": "Keep original sound",
+          "default": "yes"
+        },
+        "character_orientation": {
+          "enum": [
+            "image",
+            "video"
+          ],
+          "type": "string",
+          "title": "Character orientation",
+          "default": "video",
+          "description": "Generate the orientation of the characters in the video, which can be selected to match the image or the video"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0/4k/text-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates videos from text or images, with optional audio generation and output in 4K resolution.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Playground",
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 1
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 0
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0/pro/text-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0 Pro",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Kling 3.0 Text to Video (Pro) generates videos from text prompts with customizable duration, aspect ratio, and sound options. It supports multi-shot sequences and fine-tuning via CFG scale for creative video outputs.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Playground",
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 1
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 0
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0/std/text-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0 Standard",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates multi-shot videos from text or images, with native audio and durations up to 15 seconds.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Playground",
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 1
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 1
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0-turbo/text-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0 Turbo",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Kling 3.0 Turbo generates videos from text prompts, allowing customization of duration (3 to 15 seconds), resolution (720p or 1080p), and aspect ratio (16:9, 9:16, or 1:1). This variant focuses on efficient text-to-video creation with flexible output settings.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Turbo",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0/4k/image-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0 4k",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Kling 3.0 4K converts a single image URL into a video up to 15 seconds long, with optional sound generation and multi-shot or multi-prompt support. Users can customize duration, prompts, and configuration scale to influence the video output.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Playground",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 1
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 0
+        },
+        "last_image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0/pro/image-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0 Pro",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Kling 3.0 Image to Video (Pro) generates videos from a single image URL with optional sound and customizable duration up to 15 seconds. It supports multi-shot sequences with multiple prompts and fine-tuning via CFG scale for creative video outputs.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Playground",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 1
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 0
+        },
+        "last_image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0/std/image-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0 Standard",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Kling 3.0 Standard converts a single image URL into a video clip with optional sound and customizable duration up to 15 seconds. Users can enhance the output with prompts, multiple shots, and control the CFG scale for creative variation.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Playground",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "title": "Generate sound",
+          "default": "on"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cfg_scale": {
+          "type": "number",
+          "title": "CFG Scale",
+          "default": 0.5,
+          "maximum": 1,
+          "minimum": 0,
+          "multipleOf": 0.01
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 1
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 1
+        },
+        "last_image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3.0-turbo/image-to-video",
+    "family": "Kling 3.0",
+    "name": "Kling 3.0 Turbo",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Kling 3.0 Turbo converts a single image into a short video clip using a text prompt to guide the animation. Users can specify the video duration between 3 to 15 seconds and choose between 720p or 1080p resolution for output.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling 3.0 Turbo",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3/motion-control/pro",
+    "family": "Kling 3.0 Motion Control",
+    "name": "Kling 3.0",
+    "workflow": "Pro",
+    "category": "image2video",
+    "description": "Kling 3.0 Motion Control (Pro) generates videos by animating a source image according to the motion in a provided video. Users can control character orientation and choose to retain the original video's sound for customized motion-driven video creation.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling V3 Motion Control Playground",
+      "required": [
+        "image_url",
+        "video_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "default": "",
+          "description": "Write your prompt here"
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "video_url": {
+          "type": "string",
+          "title": "Video URL",
+          "format": "uri"
+        },
+        "keep_original_sound": {
+          "enum": [
+            "yes",
+            "no"
+          ],
+          "type": "string",
+          "title": "Keep original sound",
+          "default": "yes"
+        },
+        "character_orientation": {
+          "enum": [
+            "image",
+            "video"
+          ],
+          "type": "string",
+          "title": "Character orientation",
+          "default": "video",
+          "description": "Generate the orientation of the characters in the video, which can be selected to match the image or the video"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/v3/motion-control/std",
+    "family": "Kling 3.0 Motion Control",
+    "name": "Kling 3.0",
+    "workflow": "Std",
+    "category": "image2video",
+    "description": "Kling 3.0 Motion Control (Standard) generates videos by animating a source image according to the motion in a provided video. Users can control character orientation and choose to retain the original video's sound for customized video creation.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling V3 Motion Control Playground",
+      "required": [
+        "image_url",
+        "video_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "default": "",
+          "description": "Write your prompt here"
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "video_url": {
+          "type": "string",
+          "title": "Video URL",
+          "format": "uri"
+        },
+        "keep_original_sound": {
+          "enum": [
+            "yes",
+            "no"
+          ],
+          "type": "string",
+          "title": "Keep original sound",
+          "default": "yes"
+        },
+        "character_orientation": {
+          "enum": [
+            "image",
+            "video"
+          ],
+          "type": "string",
+          "title": "Character orientation",
+          "default": "video",
+          "description": "Generate the orientation of the characters in the video, which can be selected to match the image or the video"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/o3/first-last-frame",
+    "family": "Kling O3",
+    "name": "Kling O3",
+    "workflow": "First last frame",
+    "category": "image2video",
+    "description": "Generates and edits videos using image or video references, multi-shot scenes and native sound.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "if": {
+        "properties": {
+          "multi_shots": {
+            "const": true
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "prompt",
+          "first_frame_url"
+        ]
+      },
+      "then": {
+        "required": [
+          "multi_prompt",
+          "first_frame_url"
+        ]
+      },
+      "type": "object",
+      "title": "Kling O3 Playground",
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro",
+            "4k"
+          ],
+          "type": "string",
+          "default": "pro"
+        },
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "default": "off"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string"
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 1
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 1
+        },
+        "last_frame_url": {
+          "type": "string",
+          "title": "Last frame URL",
+          "format": "uri"
+        },
+        "first_frame_url": {
+          "type": "string",
+          "title": "First frame URL",
+          "format": "uri"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/o3/image-reference",
+    "family": "Kling O3",
+    "name": "Kling O3",
+    "workflow": "Image reference",
+    "category": "image2video",
+    "description": "Kling O3 Image Reference generates videos from one or multiple images using customizable prompts and settings like duration, aspect ratio, and sound. It supports both single and multi-shot workflows with options for intelligent or customized shot types.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "if": {
+        "properties": {
+          "multi_shots": {
+            "const": true
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "prompt"
+        ]
+      },
+      "then": {
+        "required": [
+          "multi_prompt"
+        ]
+      },
+      "type": "object",
+      "title": "Kling Omni Playground",
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro",
+            "4k"
+          ],
+          "type": "string",
+          "default": "std"
+        },
+        "sound": {
+          "enum": [
+            "on",
+            "off"
+          ],
+          "type": "string",
+          "default": "off"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "shot_type": {
+          "enum": [
+            "customize",
+            "intelligent"
+          ],
+          "type": "string",
+          "default": "customize"
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          }
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string"
+        },
+        "multi_prompt": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "duration": {
+                "type": "integer",
+                "maximum": 15,
+                "minimum": 0
+              }
+            }
+          },
+          "maxItems": 6,
+          "minItems": 1
+        },
+        "last_frame_url": {
+          "type": "string",
+          "title": "Last frame URL",
+          "format": "uri"
+        },
+        "first_frame_url": {
+          "type": "string",
+          "title": "First frame URL",
+          "format": "uri"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/o3/video-edit",
+    "family": "Kling O3",
+    "name": "Kling O3",
+    "workflow": "Video edit",
+    "category": "image2video",
+    "description": "Kling O3 Video Edit generates edited videos from a single input video URL and optional images or elements, guided by a text prompt. Users can select modes including standard, professional, or 4K to customize output quality.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling O3 Playground",
+      "required": [
+        "prompt",
+        "video_urls"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro",
+            "4k"
+          ],
+          "type": "string",
+          "default": "pro"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Video URL",
+            "format": "uri"
+          },
+          "maxItems": 1,
+          "minItems": 1
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/o3/video-reference",
+    "family": "Kling O3",
+    "name": "Kling O3",
+    "workflow": "Video reference",
+    "category": "image2video",
+    "description": "Kling O3 Video Reference generates videos based on a text prompt and a single reference video URL. Users can customize duration, aspect ratio, and optionally include images or elements to influence the output.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling O3 Playground",
+      "required": [
+        "prompt",
+        "video_urls"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro"
+          ],
+          "type": "string",
+          "default": "pro"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 10,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Video URL",
+            "format": "uri"
+          },
+          "maxItems": 1,
+          "minItems": 1
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/omni/first-last-frame",
+    "family": "Kling Omni",
+    "name": "Kling Omni",
+    "workflow": "First last frame",
+    "category": "image2video",
+    "description": "Generates and edits videos using image or video references and controls for start and end frames.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling Omni Playground",
+      "required": [
+        "prompt",
+        "first_frame_url"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro"
+          ],
+          "type": "string",
+          "default": "pro"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "default": "16:9"
+        },
+        "last_frame_url": {
+          "type": "string",
+          "title": "Last frame URL",
+          "format": "uri"
+        },
+        "first_frame_url": {
+          "type": "string",
+          "title": "First frame URL",
+          "format": "uri"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/omni/image-reference",
+    "family": "Kling Omni",
+    "name": "Kling Omni",
+    "workflow": "Image reference",
+    "category": "image2video",
+    "description": "Kling Omni Image Reference generates videos from images and text prompts, allowing customization of duration, aspect ratio, and elements. It supports modes for standard or professional output, making it suitable for creating dynamic video content from static images.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling Omni Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro"
+          ],
+          "type": "string",
+          "default": "pro"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 10,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          }
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "default": "16:9"
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/omni/video-edit",
+    "family": "Kling Omni",
+    "name": "Kling Omni",
+    "workflow": "Video edit",
+    "category": "image2video",
+    "description": "Kling Omni Video Edit enables video generation from a single input video URL combined with text prompts and optional images or elements. Users can select between standard and pro modes to customize the editing process.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling Omni Playground",
+      "required": [
+        "prompt",
+        "video_urls"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro"
+          ],
+          "type": "string",
+          "default": "pro"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Video URL",
+            "format": "uri"
+          },
+          "maxItems": 1,
+          "minItems": 1
+        }
+      }
+    }
+  },
+  {
+    "id": "kling-video/omni/video-reference",
+    "family": "Kling Omni",
+    "name": "Kling Omni",
+    "workflow": "Video reference",
+    "category": "image2video",
+    "description": "Kling Omni Video Reference generates videos from a single input video URL combined with a text prompt and optional images or elements. It supports customizable duration and aspect ratios, enabling creative video synthesis based on reference footage.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Kling Omni Playground",
+      "required": [
+        "prompt",
+        "video_urls"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "std",
+            "pro"
+          ],
+          "type": "string",
+          "default": "pro"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "mode": {
+            "enum": [
+              "std",
+              "pro"
+            ],
+            "type": "string",
+            "default": "pro"
+          },
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 10,
+          "minimum": 3
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          },
+          "maxItems": 4,
+          "minItems": 0
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Video URL",
+            "format": "uri"
+          },
+          "maxItems": 1,
+          "minItems": 1
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "type": "string",
+          "default": "16:9"
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/happy-horse/text-to-video",
+    "family": "Happy Horse 1.0",
+    "name": "Happy Horse 1.0",
+    "workflow": "Text to video",
+    "category": "image2video",
+    "description": "Generates videos from text or image references with clips up to 15 seconds and 1080p resolution.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Happy Horse",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "16:9"
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/happy-horse/image-to-video",
+    "family": "Happy Horse 1.0",
+    "name": "Happy Horse 1.0",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Happy Horse 1.0 - Image to Video. Configured Alibaba route; cloned from hh/image-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Happy horse",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 2
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/happy-horse/reference-to-video",
+    "family": "Happy Horse 1.0",
+    "name": "Happy Horse 1.0",
+    "workflow": "Reference to video",
+    "category": "image2video",
+    "description": "Happy Horse 1.0 - Reference to Video. Configured Alibaba route; cloned from happy-horse/reference-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Happy horse",
+      "required": [
+        "image_urls",
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 2
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          }
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/happy-horse/v1.1/text-to-video",
+    "family": "HappyHorse 1.1",
+    "name": "HappyHorse 1.1",
+    "workflow": "Text to video",
+    "category": "image2video",
+    "description": "Generates videos from text or image references with output at 1080p and clips up to 15 seconds.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Happy Horse",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 3
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "1080p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "16:9"
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/happy-horse/v1.1/image-to-video",
+    "family": "HappyHorse 1.1",
+    "name": "HappyHorse 1.1",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "HappyHorse 1.1 - Image to Video. Configured Alibaba route; cloned from hh/image-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Happy horse",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 2
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "1080p"
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/happy-horse/v1.1/reference-to-video",
+    "family": "HappyHorse 1.1",
+    "name": "HappyHorse 1.1",
+    "workflow": "Reference to video",
+    "category": "image2video",
+    "description": "HappyHorse 1.1 - Reference to Video. Configured Alibaba route; cloned from happy-horse/reference-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Happy horse",
+      "required": [
+        "image_urls",
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 2
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image URL",
+            "format": "uri"
+          }
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "1080p"
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/wan-3.0/text-to-video",
+    "family": "Wan 3.0",
+    "name": "Wan 3.0 Text to Video",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates videos from text or images with native audio and adjustable duration up to 30 seconds.",
+    "pricing": "Priced per generated second by resolution: 480p $0.05, 720p $0.10, or 1080p $0.20. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 3.0 Text to Video",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration (sec)",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 2,
+          "description": "2-30 seconds."
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "1080p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "adaptive"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "adaptive"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Sound",
+          "default": true
+        },
+        "enable_thinking": {
+          "type": "boolean",
+          "title": "Deep Thinking",
+          "default": false
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/wan-3.0/image-to-video",
+    "family": "Wan 3.0",
+    "name": "Wan 3.0 Image to Video",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Generate videos from a starting image with Wan 3.0.",
+    "pricing": "Priced per generated second by resolution: 480p $0.05, 720p $0.10, or 1080p $0.20. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 3.0 Image to Video",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration (sec)",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 2,
+          "description": "2-30 seconds."
+        },
+        "image_url": {
+          "type": "string",
+          "title": "First Frame",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "1080p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "adaptive"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "adaptive"
+        },
+        "end_image_url": {
+          "type": "string",
+          "title": "Last Frame",
+          "format": "uri"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Sound",
+          "default": true
+        },
+        "enable_thinking": {
+          "type": "boolean",
+          "title": "Deep Thinking",
+          "default": false
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/wan-3.0/reference-to-video",
+    "family": "Wan 3.0",
+    "name": "Wan 3.0 Reference to Video",
+    "workflow": "Reference to video",
+    "category": "image2video",
+    "description": "Generate videos guided by reference images with Wan 3.0.",
+    "pricing": "Priced per generated second by resolution: 480p $0.05, 720p $0.10, or 1080p $0.20. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 3.0 Reference to Video",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration (sec)",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 2,
+          "description": "2-30 seconds."
+        },
+        "file_url": {
+          "type": "string",
+          "title": "Reference Document",
+          "format": "uri",
+          "description": "One document (docx/xlsx/pptx/pdf/md). Forces deep thinking."
+        },
+        "link_url": {
+          "type": "string",
+          "title": "Reference Web Page",
+          "format": "uri",
+          "description": "One public page. Forces deep thinking. Not combinable with file_url."
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference Audio",
+          "maxItems": 5,
+          "description": "Up to 5 files, 30s total. WAV or MP3."
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference Images",
+          "maxItems": 10
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "1080p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference Videos",
+          "maxItems": 5,
+          "description": "Up to 5 clips, 30s total, each 1-30s."
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "adaptive"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "adaptive"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Sound",
+          "default": true
+        },
+        "enable_thinking": {
+          "type": "boolean",
+          "title": "Deep Thinking",
+          "default": false
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/wan-3.0-prime/text-to-video",
+    "family": "Wan 3.0 Prime",
+    "name": "Wan 3.0 Prime Text to Video",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates videos from text or media references with fast processing and clips up to 30 seconds.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 3.0 Prime Text to Video",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration (sec)",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 2,
+          "description": "2-30 seconds."
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "1080p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "adaptive"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "adaptive"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Sound",
+          "default": true
+        },
+        "enable_thinking": {
+          "type": "boolean",
+          "title": "Deep Thinking",
+          "default": false
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/wan-3.0-prime/image-to-video",
+    "family": "Wan 3.0 Prime",
+    "name": "Wan 3.0 Prime Image to Video",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Generate videos from a starting image with Wan 3.0 Prime.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 3.0 Prime Image to Video",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration (sec)",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 2,
+          "description": "2-30 seconds."
+        },
+        "image_url": {
+          "type": "string",
+          "title": "First Frame",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "1080p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "adaptive"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "adaptive"
+        },
+        "end_image_url": {
+          "type": "string",
+          "title": "Last Frame",
+          "format": "uri"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Sound",
+          "default": true
+        },
+        "enable_thinking": {
+          "type": "boolean",
+          "title": "Deep Thinking",
+          "default": false
+        }
+      }
+    }
+  },
+  {
+    "id": "alibaba/wan-3.0-prime/reference-to-video",
+    "family": "Wan 3.0 Prime",
+    "name": "Wan 3.0 Prime Reference to Video",
+    "workflow": "Reference to video",
+    "category": "image2video",
+    "description": "Generate videos guided by reference images with Wan 3.0 Prime.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 3.0 Prime Reference to Video",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration (sec)",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 2,
+          "description": "2-30 seconds."
+        },
+        "file_url": {
+          "type": "string",
+          "title": "Reference Document",
+          "format": "uri",
+          "description": "One document (docx/xlsx/pptx/pdf/md). Forces deep thinking."
+        },
+        "link_url": {
+          "type": "string",
+          "title": "Reference Web Page",
+          "format": "uri",
+          "description": "One public page. Forces deep thinking. Not combinable with file_url."
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference Audio",
+          "maxItems": 5,
+          "description": "Up to 5 files, 30s total. WAV or MP3."
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference Images",
+          "maxItems": 10
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "1080p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference Videos",
+          "maxItems": 5,
+          "description": "Up to 5 clips, 30s total, each 1-30s."
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "adaptive"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "adaptive"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Sound",
+          "default": true
+        },
+        "enable_thinking": {
+          "type": "boolean",
+          "title": "Deep Thinking",
+          "default": false
+        }
+      }
+    }
+  },
+  {
+    "id": "higgsfield/cinema-studio/4.0",
+    "family": "Cinema Studio 4.0",
+    "name": "Cinema Studio 4.0",
+    "workflow": "4.0",
+    "category": "video2video",
+    "description": "Generates cinematic videos from text, image, or video references with automatic scene direction.",
+    "pricing": "Token-metered pricing. Billable video tokens = ceil((input video seconds + generated video seconds) × output width × output height × 24 fps / 1024). Image and audio references do not count as video input. At 480p or 720p, each 1,000 video tokens cost $0.0214 without video input or $0.01284 with video input (0.6× the standard rate). With video references, both input and generated video durations are billable. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "type": "object",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "era": {
+          "enum": [
+            "1960s",
+            "1980s",
+            "1990s",
+            "2000s",
+            "2020s"
+          ],
+          "type": "string"
+        },
+        "genre": {
+          "enum": [
+            "epic",
+            "drama",
+            "noir",
+            "comedy",
+            "horror",
+            "action"
+          ],
+          "type": "string"
+        },
+        "light": {
+          "enum": [
+            "silhouette",
+            "practicals",
+            "window",
+            "overhead-fall",
+            "contre-jour",
+            "soft-cross"
+          ],
+          "type": "string"
+        },
+        "pacing": {
+          "enum": [
+            "chaotic",
+            "dynamic",
+            "calm",
+            "single-shot"
+          ],
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string",
+          "pattern": "\\S",
+          "minLength": 1
+        },
+        "duration": {
+          "type": "integer",
+          "default": 5,
+          "maximum": 30,
+          "minimum": 4
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 30
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "maxItems": 10
+        },
+        "camera_lens": {
+          "enum": [
+            "clean-sharp",
+            "anamorphic",
+            "vintage-anamorphic",
+            "warm-vintage",
+            "halation-vintage"
+          ],
+          "type": "string"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16",
+            "21:9"
+          ],
+          "type": "string",
+          "default": "16:9"
+        },
+        "camera_model": {
+          "enum": [
+            "modern",
+            "35mm-film",
+            "8mm-film",
+            "dv-camcorder"
+          ],
+          "type": "string"
+        },
+        "color_palette": {
+          "enum": [
+            "static-noon",
+            "twilight-fable",
+            "back-row-kissing-seats",
+            "on-the-other-side-of-the-porthole",
+            "the-emerald-ambush",
+            "highway-standoff",
+            "the-faded-fresco",
+            "oil-ochre",
+            "the-mountain-convent",
+            "ghost-in-the-code",
+            "pink-velvet",
+            "two-days-to-the-horizon",
+            "industrial-fog",
+            "stairs-go-up",
+            "field-post",
+            "home-is-the-next-gas-station",
+            "glossy-flesh",
+            "the-crimson-ballet",
+            "neon-rain-at-midnight",
+            "the-morning-after-rain",
+            "the-iron-borough",
+            "the-ground",
+            "the-investigation",
+            "turquoise-mirage",
+            "a-dream-in-color",
+            "breakfast-on-schedule",
+            "favela-gold",
+            "a-hotel-for-one",
+            "after-dark",
+            "crimson-vigi",
+            "the-neighbors-saw-everything",
+            "the-grey-channel",
+            "mirage-at-noon",
+            "bubblegum-boulevard",
+            "yellow-room",
+            "the-earth-keeps-things-reluctantly",
+            "tropic-fever-dream",
+            "bioluminescent-night",
+            "dont-turn-it-off-im-watching",
+            "the-silk-curtain-falls",
+            "the-butterfly",
+            "playtime",
+            "wallpaper-romance",
+            "overtime",
+            "the-way-home-is-longer",
+            "everyone-speaks-in-whispers",
+            "runaway-summer",
+            "amber-wasteland",
+            "the-circus",
+            "gasoline-sunset"
+          ],
+          "type": "string"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "default": true
+        },
+        "camera_aperture": {
+          "enum": [
+            "f14-wide-open",
+            "f4-moderate",
+            "f11-deep-focus"
+          ],
+          "type": "string"
+        },
+        "camera_movement": {
+          "enum": [
+            "snorricam",
+            "robot-arm",
+            "tilt-up",
+            "rack-focus",
+            "tilt-down",
+            "pov",
+            "pan-left",
+            "crane-up",
+            "pan-right",
+            "crane-down",
+            "side-tracking",
+            "pedestal-up",
+            "pedestal-down",
+            "handheld",
+            "tracking",
+            "drone-orbit",
+            "dolly-zoom",
+            "aerial-pullback",
+            "static-shot",
+            "bullet-time",
+            "whip-pan",
+            "slow-zoom-in",
+            "arc-left",
+            "slow-zoom-out",
+            "arc-right",
+            "truck-right",
+            "dolly-in",
+            "truck-left",
+            "dolly-out",
+            "slider-right",
+            "crush-zoom",
+            "slider-left",
+            "helicopter-shot"
+          ],
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "lightricks/ltx-2.5/text-to-video/fast",
+    "family": "LTX-2.5",
+    "name": "LTX-2.5 Fast",
+    "workflow": "Fast",
+    "category": "text2video",
+    "description": "Generates videos from text or images with native audio, camera motion controls and 4K resolution.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "LTX-2.5 Fast Text to Video Playground",
+      "required": [
+        "prompt",
+        "duration"
+      ],
+      "properties": {
+        "fps": {
+          "enum": [
+            24,
+            25,
+            48,
+            50
+          ],
+          "type": "integer",
+          "title": "Frames per second",
+          "default": 25
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "maxLength": 5000,
+          "minLength": 2,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            6,
+            8,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 6
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Generate audio",
+          "default": true
+        },
+        "camera_movement": {
+          "enum": [
+            "dolly_in",
+            "dolly_out",
+            "dolly_left",
+            "dolly_right",
+            "jib_up",
+            "jib_down",
+            "static",
+            "focus_shift"
+          ],
+          "type": "string",
+          "title": "Camera movement"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "lightricks/ltx-2.5/text-to-video/pro",
+    "family": "LTX-2.5",
+    "name": "LTX-2.5 Pro",
+    "workflow": "Pro",
+    "category": "text2video",
+    "description": "Generates videos from text or images with native audio, camera motion controls and 1080p output.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "LTX-2.5 Pro Text to Video Playground",
+      "required": [
+        "prompt",
+        "duration"
+      ],
+      "properties": {
+        "fps": {
+          "enum": [
+            24,
+            25,
+            50
+          ],
+          "type": "integer",
+          "title": "Frames per second",
+          "default": 25
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "maxLength": 5000,
+          "minLength": 2,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            6,
+            8,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 6
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Generate audio",
+          "default": true
+        },
+        "camera_movement": {
+          "enum": [
+            "dolly_in",
+            "dolly_out",
+            "dolly_left",
+            "dolly_right",
+            "jib_up",
+            "jib_down",
+            "static",
+            "focus_shift"
+          ],
+          "type": "string",
+          "title": "Camera movement"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "lightricks/ltx-2.5/image-to-video/fast",
+    "family": "LTX-2.5",
+    "name": "LTX-2.5 Fast",
+    "workflow": "Fast",
+    "category": "image2video",
+    "description": "LTX-2.5 Fast Image to Video on Runware with native audio and optional camera movement.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "LTX-2.5 Fast Image to Video Playground",
+      "required": [
+        "prompt",
+        "duration",
+        "image_url"
+      ],
+      "properties": {
+        "fps": {
+          "enum": [
+            24,
+            25,
+            48,
+            50
+          ],
+          "type": "integer",
+          "title": "Frames per second",
+          "default": 25
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "maxLength": 5000,
+          "minLength": 2,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            6,
+            8,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 6
+        },
+        "image_url": {
+          "type": "string",
+          "title": "First frame",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "end_image_url": {
+          "type": "string",
+          "title": "Last frame",
+          "format": "uri"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Generate audio",
+          "default": true
+        },
+        "camera_movement": {
+          "enum": [
+            "dolly_in",
+            "dolly_out",
+            "dolly_left",
+            "dolly_right",
+            "jib_up",
+            "jib_down",
+            "static",
+            "focus_shift"
+          ],
+          "type": "string",
+          "title": "Camera movement"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "lightricks/ltx-2.5/image-to-video/pro",
+    "family": "LTX-2.5",
+    "name": "LTX-2.5 Pro",
+    "workflow": "Pro",
+    "category": "image2video",
+    "description": "LTX-2.5 Pro Image to Video on Runware with native audio and optional camera movement.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "LTX-2.5 Pro Image to Video Playground",
+      "required": [
+        "prompt",
+        "duration",
+        "image_url"
+      ],
+      "properties": {
+        "fps": {
+          "enum": [
+            24,
+            25,
+            50
+          ],
+          "type": "integer",
+          "title": "Frames per second",
+          "default": 25
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "maxLength": 5000,
+          "minLength": 2,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            6,
+            8,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 6
+        },
+        "image_url": {
+          "type": "string",
+          "title": "First frame",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "end_image_url": {
+          "type": "string",
+          "title": "Last frame",
+          "format": "uri"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Generate audio",
+          "default": true
+        },
+        "camera_movement": {
+          "enum": [
+            "dolly_in",
+            "dolly_out",
+            "dolly_left",
+            "dolly_right",
+            "jib_up",
+            "jib_down",
+            "static",
+            "focus_shift"
+          ],
+          "type": "string",
+          "title": "Camera movement"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "minimax/h3/text-to-video",
+    "family": "MiniMax H3",
+    "name": "MiniMax H3",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates 2K videos up to 15 seconds using text, image, video, and optional audio reference files.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "MiniMax H3 Text to Video Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 5
+        },
+        "resolution": {
+          "enum": [
+            "2K"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "2K"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "auto",
+            "adaptive",
+            "21:9",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "auto"
+        },
+        "aigc_watermark": {
+          "type": "boolean",
+          "title": "AIGC watermark",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "minimax/h3/image-to-video",
+    "family": "MiniMax H3",
+    "name": "MiniMax H3",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "MiniMax H3 / Hailuo-03 preview integration using Video Generation V2.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "MiniMax H3 Image to Video Playground",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 5
+        },
+        "image_url": {
+          "type": "string",
+          "title": "First frame URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "2K"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "2K"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "auto",
+            "adaptive",
+            "21:9",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "auto"
+        },
+        "end_image_url": {
+          "type": "string",
+          "title": "Last frame URL",
+          "format": "uri"
+        },
+        "aigc_watermark": {
+          "type": "boolean",
+          "title": "AIGC watermark",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "minimax/h3/reference-to-video",
+    "family": "MiniMax H3",
+    "name": "MiniMax H3",
+    "workflow": "Reference to video",
+    "category": "image2video, video2video",
+    "description": "MiniMax H3 generates videos from reference images or videos using Video Generation V2. Users provide prompts, reference media URLs, and optional audio to create videos up to 15 seconds with customizable resolution and aspect ratio.",
+    "pricing": "2K output costs $0.13 per generated second. The first five reference images are included; each additional reference image costs $0.08. Rates shown are before any applicable customer discount.",
+    "schema": {
+      "if": {
+        "required": [
+          "image_urls"
+        ]
+      },
+      "else": {
+        "required": [
+          "video_urls"
+        ]
+      },
+      "type": "object",
+      "title": "MiniMax H3 Reference to Video Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 5
+        },
+        "audio_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference audio URLs",
+          "maxItems": 3,
+          "minItems": 0
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference image URLs",
+          "maxItems": 9,
+          "minItems": 1
+        },
+        "resolution": {
+          "enum": [
+            "2K"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "2K"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": "Reference video URLs",
+          "maxItems": 3,
+          "minItems": 1
+        },
+        "aspect_ratio": {
+          "enum": [
+            "auto",
+            "adaptive",
+            "21:9",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "auto"
+        },
+        "aigc_watermark": {
+          "type": "boolean",
+          "title": "AIGC watermark",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "minimax/hailuo-2.3/standard/text-to-video",
+    "family": "Hailuo 2.3",
+    "name": "MiniMax Hailuo 2.3 Standard",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates short videos from text or images with fluid body motion and natural facial expressions.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Minimax Hailuo 2.3 Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            6,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 6
+        },
+        "prompt_optimizer": {
+          "type": "boolean",
+          "title": "Prompt optimizer",
+          "default": true
+        }
+      }
+    }
+  },
+  {
+    "id": "minimax/hailuo-2.3/standard/image-to-video",
+    "family": "Hailuo 2.3",
+    "name": "MiniMax Hailuo 2.3 Standard",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "MiniMax Hailuo 2.3 Standard converts a single image into a short video clip of 6 or 10 seconds based on a text prompt. Users provide an image URL and optional prompt optimization to guide the video generation process.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Minimax Hailuo 2.3 Playground",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            6,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 6
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "prompt_optimizer": {
+          "type": "boolean",
+          "title": "Prompt optimizer",
+          "default": true
+        }
+      }
+    }
+  },
+  {
+    "id": "pixverse/v6/text-to-video",
+    "family": "PixVerse V6",
+    "name": "PixVerse V6",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates videos from text or images with native sound and control over the first and last frames.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "PixVerse V6 Text to Video Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "maxLength": 5000,
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "number",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 1
+        },
+        "resolution": {
+          "enum": [
+            "360p",
+            "540p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect ratio",
+          "default": "16:9"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Generate audio",
+          "default": true
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative prompt",
+          "maxLength": 2048,
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "pixverse/v6/image-to-video",
+    "family": "PixVerse V6",
+    "name": "PixVerse V6",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "PixVerse V6 Image to Video on Runware with optional native synchronized audio.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "PixVerse V6 Image to Video Playground",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "title": "Seed",
+          "maximum": 2147483647,
+          "minimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "maxLength": 5000,
+          "minLength": 1,
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "number",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 1
+        },
+        "image_url": {
+          "type": "string",
+          "title": "First frame",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "360p",
+            "540p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "end_image_url": {
+          "type": "string",
+          "title": "Last frame",
+          "format": "uri"
+        },
+        "generate_audio": {
+          "type": "boolean",
+          "title": "Generate audio",
+          "default": true
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative prompt",
+          "maxLength": 2048,
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "id": "wan/v2.6/text-to-video",
+    "family": "Wan 2.6",
+    "name": "Wan 2.6",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates multi-shot videos from text or images with native sound and optional video references.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 2.6 Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 10000000,
+          "minimum": -1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10,
+            15
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "audio_url": {
+          "type": "string",
+          "title": "Audio URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "prompt_extend": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  },
+  {
+    "id": "wan/v2.6/image-to-video",
+    "family": "Wan 2.6",
+    "name": "Wan 2.6",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Wan 2.6 - Image to Video. Configured Alibaba route; cloned from wan-26/image-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 2.6 Playground",
+      "required": [
+        "prompt",
+        "image_url"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 10000000,
+          "minimum": -1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10,
+            15
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "audio_url": {
+          "type": "string",
+          "title": "Audio URL",
+          "format": "uri"
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "multi_shots": {
+          "type": "boolean",
+          "default": false
+        },
+        "prompt_extend": {
+          "type": "boolean",
+          "default": false
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative prompt",
+          "default": ""
+        }
+      }
+    }
+  },
+  {
+    "id": "wan/v2.6/reference-to-video",
+    "family": "Wan 2.6",
+    "name": "Wan 2.6",
+    "workflow": "Reference to video",
+    "category": "image2video",
+    "description": "Wan 2.6 - Reference to Video. Configured Alibaba route; cloned from wan-26/references-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 2.6 Playground",
+      "required": [
+        "prompt",
+        "video_urls"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "enum": [
+            5,
+            10
+          ],
+          "type": "integer",
+          "title": "Duration",
+          "default": 5
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "720p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Video URL",
+            "format": "uri"
+          },
+          "maxItems": 3,
+          "minItems": 1
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4"
+          ],
+          "type": "string",
+          "default": "16:9"
+        }
+      }
+    }
+  },
+  {
+    "id": "wan/v2.7/text-to-video",
+    "family": "Wan 2.7",
+    "name": "Wan 2.7",
+    "workflow": "Text to video",
+    "category": "text2video",
+    "description": "Generates videos from text or images with native audio and consistent characters across scenes.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 2.6 Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 2
+        },
+        "audio_url": {
+          "type": "string",
+          "title": "Audio URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16",
+            "1:1",
+            "4:3",
+            "3:4"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "16:9"
+        },
+        "prompt_extend": {
+          "type": "boolean",
+          "default": false
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative prompt",
+          "default": ""
+        }
+      }
+    }
+  },
+  {
+    "id": "wan/v2.7/image-to-video",
+    "family": "Wan 2.7",
+    "name": "Wan 2.7",
+    "workflow": "Image to video",
+    "category": "image2video",
+    "description": "Wan 2.7 - Image to Video. Configured Alibaba route; cloned from wan-27/image-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Wan 2.6 Playground",
+      "required": [
+        "image_url"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 2
+        },
+        "audio_url": {
+          "type": "string",
+          "title": "Audio URL",
+          "format": "uri"
+        },
+        "image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "end_image_url": {
+          "type": "string",
+          "title": "Image URL",
+          "format": "uri"
+        },
+        "prompt_extend": {
+          "type": "boolean",
+          "default": false
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative prompt",
+          "default": ""
+        }
+      }
+    }
+  },
+  {
+    "id": "wan/v2.7/reference-to-video",
+    "family": "Wan 2.7",
+    "name": "Wan 2.7",
+    "workflow": "Reference to video",
+    "category": "image2video",
+    "description": "Wan 2.7 - Reference to Video. Configured Alibaba route; cloned from wan-27/reference-to-video.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "if": {
+        "required": [
+          "image_urls"
+        ],
+        "properties": {
+          "image_urls": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "video_urls"
+        ],
+        "properties": {
+          "video_urls": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      },
+      "type": "object",
+      "title": "Wan 2.7 References",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "maximum": 2147483646,
+          "minimum": 1
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 10,
+          "minimum": 2
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image",
+            "format": "uri"
+          }
+        },
+        "resolution": {
+          "enum": [
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "default": "720p"
+        },
+        "video_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Video",
+            "format": "uri"
+          }
+        },
+        "aspect_ratio": {
+          "enum": [
+            "16:9",
+            "9:16"
+          ],
+          "type": "string",
+          "title": "Aspect Ratio",
+          "default": "16:9"
+        },
+        "prompt_extend": {
+          "type": "boolean",
+          "default": false
+        },
+        "negative_prompt": {
+          "type": "string",
+          "title": "Negative prompt",
+          "default": ""
+        }
+      }
+    }
+  },
+  {
+    "id": "xai/grok-imagine-video/v1.5/reference-to-video",
+    "family": "Grok Imagine Video 1.5",
+    "name": "Grok Imagine Video 1.5",
+    "workflow": "Reference to video",
+    "category": "image2video, text2video",
+    "description": "Creates videos from text prompts or still images, with 1080p resolution and clips up to 15 seconds.",
+    "pricing": "Public pricing information is not available for this model.",
+    "schema": {
+      "type": "object",
+      "title": "Grok Imagine Video 1.5 Reference Playground",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "title": "Prompt",
+          "description": "Write your prompt here"
+        },
+        "duration": {
+          "type": "integer",
+          "title": "Duration",
+          "default": 5,
+          "maximum": 15,
+          "minimum": 1
+        },
+        "audio_url": {
+          "type": "string",
+          "title": "Reference audio",
+          "format": "uri"
+        },
+        "image_url": {
+          "type": "string",
+          "title": "First-frame image",
+          "format": "uri"
+        },
+        "image_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "title": "Image",
+            "format": "uri"
+          },
+          "title": "Reference images",
+          "maxItems": 7,
+          "minItems": 0
+        },
+        "resolution": {
+          "enum": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "type": "string",
+          "title": "Resolution",
+          "default": "480p"
+        },
+        "aspect_ratio": {
+          "enum": [
+            "auto",
+            "1:1",
+            "16:9",
+            "9:16",
+            "4:3",
+            "3:4",
+            "3:2",
+            "2:3"
+          ],
+          "type": "string",
+          "default": "auto"
+        }
+      }
+    }
+  }
+]
