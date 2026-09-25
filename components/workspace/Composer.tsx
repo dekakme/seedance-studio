@@ -1,26 +1,13 @@
 "use client";
 
-import {
-  AlertTriangle,
-  AtSign,
-  ChevronDown,
-  Clock,
-  FileVideo,
-  Gauge,
-  Gem,
-  Loader2,
-  RectangleHorizontal,
-  SlidersHorizontal,
-  Sparkles,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { AlertTriangle, AtSign, Clock, FileVideo, Gauge, Loader2, RectangleHorizontal, SlidersHorizontal, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { MediaSlot } from "./MediaSlot";
+import { PopoverSelect, type PopoverOption } from "./Popover";
 import { PromptEditor, type InsertRequest } from "./PromptEditor";
 import { ReferenceBox } from "./ReferenceBox";
-import { estimateForForm, formatUsd } from "@/lib/cost";
+import { GENJUTSU_USD_PER_SECOND, KLING_USD_PER_SECOND, estimateForForm, formatUsd } from "@/lib/cost";
 import { BITRATE_MODES, MODEL_LABEL, MODE_SPECS, OUTPUT_FORMATS, RESOLUTIONS, type SingleField } from "@/lib/modes";
 import {
   DEFAULT_FORM,
@@ -40,7 +27,6 @@ import type { Job } from "@/lib/types";
 const TABS: { id: Tab; label: string }[] = [
   { id: "create", label: "Create Video" },
   { id: "edit", label: "Edit Video" },
-  { id: "motion", label: "Motion Control" },
 ];
 
 const SUBS: Record<CreateModel, { id: CreateSub; label: string }[]> = {
@@ -53,13 +39,23 @@ const SUBS: Record<CreateModel, { id: CreateSub; label: string }[]> = {
     { id: "references", label: "Text" },
     { id: "frames", label: "Frames" },
   ],
+  genjutsu: [
+    { id: "motion", label: "Motion transfer" },
+    { id: "swap", label: "Objects swap" },
+  ],
 };
 
-const KLING_TIERS: { id: KlingTier; label: string }[] = [
-  { id: "std", label: "Standard" },
-  { id: "pro", label: "Pro" },
-  { id: "4k", label: "4K" },
+const MODEL_OPTIONS: PopoverOption<CreateModel>[] = [
+  { value: "seedance", label: "Seedance 2.5", badge: "TOP", meta: ["720p", "4s–30s", "Audio"] },
+  { value: "kling", label: "Kling 3.0", meta: ["Std · Pro · 4K", "3s–15s", "Audio"] },
+  { value: "genjutsu", label: "Higgsfield Genjutsu", badge: "NEW", meta: ["720p", "1s–30s", "Motion · Swap"] },
 ];
+
+const KLING_TIER_OPTIONS: PopoverOption<KlingTier>[] = (["std", "pro", "4k"] as const).map((t) => ({
+  value: t,
+  label: t === "std" ? "Standard" : t === "pro" ? "Pro" : "4K",
+  meta: [`$${KLING_USD_PER_SECOND[t]}/s`],
+}));
 
 const FRAME_LABEL: Partial<Record<SingleField, string>> = {
   image_url: "Start frame",
@@ -79,6 +75,14 @@ function Chip({ icon, title, children }: { icon: ReactNode; title: string; child
   );
 }
 
+function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onToggle} className={`relative h-5 w-9 rounded-full transition ${on ? "bg-[#d7ff3a]" : "bg-white/15"}`}>
+      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${on ? "left-[18px] bg-black" : "left-0.5"}`} />
+    </button>
+  );
+}
+
 export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCreated: (job: Job) => void }) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(preset?.tab ?? "create");
@@ -86,6 +90,8 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
   const [model, setModel] = useState<CreateModel>(preset?.model ?? "seedance");
   const [tier, setTier] = useState<KlingTier>(preset?.tier ?? "std");
   const [form, setForm] = useState<FormState>(preset?.form ?? DEFAULT_FORM);
+  // Genjutsu's prompt is optional and switched on explicitly, like Higgsfield's toggle
+  const [promptOn, setPromptOn] = useState(Boolean(preset?.form.prompt));
   // video URL -> length in seconds, reported by previews; input video is billed too
   const [durations, setDurations] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState(0);
@@ -95,19 +101,35 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
   const [clientToken, setClientToken] = useState(() => crypto.randomUUID());
   const [insertRequest, setInsertRequest] = useState<InsertRequest | null>(null);
 
-  const mode = resolveMode(tab, sub, form.refs, model, tier);
+  // Edit Video is always Seedance; a sub-tab left over from another model falls back to the first one
+  const activeModel: CreateModel = tab === "edit" ? "seedance" : model;
+  const activeSub = SUBS[activeModel].some((s) => s.id === sub) ? sub : SUBS[activeModel][0].id;
+  const mode = resolveMode(tab, activeSub, form.refs, activeModel, tier);
   const spec = MODE_SPECS[mode];
+  const isGenjutsu = spec.model === "genjutsu";
+  const showPrompt = !isGenjutsu || promptOn;
   const limits = refLimits(mode);
   const showRefs = Object.keys(limits).length > 0;
   const tags = showRefs ? refTags(form.refs) : [];
-  const missing = unknownTags(form.prompt, showRefs ? form.refs : []);
+  const missing = showPrompt ? unknownTags(form.prompt, showRefs ? form.refs : []) : [];
   const estimate = estimateForForm(mode, form, durations);
   const sourceSlot = spec.single.find((s) => s.field === "video_url");
   const frameSlots = spec.single.filter((s) => s.field !== "video_url");
   const duration = spec.duration ? Math.min(spec.duration.max, Math.max(spec.duration.min, form.duration)) : null;
   const aspect = spec.aspectRatios?.includes(form.aspect_ratio) ? form.aspect_ratio : spec.aspectRatios?.[0];
-  const banner =
-    tab === "motion" ? "MOTION CONTROL" : tab === "edit" ? "EDIT" : sub === "frames" ? "FRAMES" : sub === "extend" ? "EXTEND" : "GENERAL";
+
+  const banner = isGenjutsu
+    ? { title: "HIGGSFIELD GENJUTSU", subtitle: `Reality manipulation · ${spec.label}` }
+    : {
+        title: tab === "edit" ? "EDIT" : activeSub === "frames" ? "FRAMES" : activeSub === "extend" ? "EXTEND" : "GENERAL",
+        subtitle: `${MODEL_LABEL[spec.model]} · ${spec.label}`,
+      };
+
+  const qualityOptions: PopoverOption<string>[] = RESOLUTIONS.map((r) => ({
+    value: r,
+    label: r,
+    meta: isGenjutsu ? [`$${GENJUTSU_USD_PER_SECOND[r]}/s of input`] : undefined,
+  }));
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((f) => ({ ...f, [key]: value }));
   const setMedia = (field: SingleField) => (url: string | undefined) => setForm((f) => ({ ...f, media: { ...f.media, [field]: url } }));
@@ -120,8 +142,7 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
 
   function changeModel(next: CreateModel) {
     setModel(next);
-    // Kling has no extend endpoint
-    if (next === "kling" && sub === "extend") setSub("references");
+    if (!SUBS[next].some((s) => s.id === sub)) setSub(SUBS[next][0].id);
   }
 
   async function submit(e: FormEvent) {
@@ -130,10 +151,11 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
     setBusy(true);
     setErrors([]);
     try {
+      const input = buildInput(mode, showPrompt ? form : { ...form, prompt: "" });
       const res = await fetch("/api/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, input: buildInput(mode, form), client_token: clientToken }),
+        body: JSON.stringify({ mode, input, client_token: clientToken }),
       });
       if (res.status === 401) {
         router.push("/login");
@@ -159,6 +181,42 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
     }
   }
 
+  const promptEditor = (
+    <PromptEditor
+      value={form.prompt}
+      onChange={(v) => set("prompt", v)}
+      tags={tags}
+      insertRequest={insertRequest}
+      placeholder={
+        isGenjutsu
+          ? activeSub === "swap"
+            ? "Describe what to replace, e.g. swap the car for @Image1…"
+            : "Describe the new character, place or style…"
+          : tags.length > 0
+            ? "Describe the scene. Type @ to tag a reference, e.g. @Image1 rides past…"
+            : "Describe the scene, camera movement and mood…"
+      }
+      footer={
+        <>
+          {tags.length > 0 && (
+            <button type="button" onClick={() => insert("@", true)} className="flex items-center gap-1 rounded-lg bg-white/5 px-2 py-1 text-xs font-medium hover:bg-white/10">
+              <AtSign size={13} /> Elements
+            </button>
+          )}
+          {spec.audio && (
+            <button
+              type="button"
+              onClick={() => set("generate_audio", !form.generate_audio)}
+              className="flex items-center gap-1 rounded-lg bg-white/5 px-2 py-1 text-xs font-medium hover:bg-white/10"
+            >
+              {form.generate_audio ? <Volume2 size={13} /> : <VolumeX size={13} />} {form.generate_audio ? "On" : "Off"}
+            </button>
+          )}
+        </>
+      }
+    />
+  );
+
   return (
     <form onSubmit={submit} className="flex flex-col gap-3">
       <div className="flex gap-4 px-1 text-sm font-semibold">
@@ -174,21 +232,19 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
         ))}
       </div>
 
-      <div className="rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-800 to-teal-900 p-4">
-        <div className="text-xl font-extrabold tracking-wide text-lime-300">{banner}</div>
-        <div className="text-xs text-neutral-300">
-          {MODEL_LABEL[spec.model]} · {spec.label}
-        </div>
+      <div className={`rounded-2xl p-4 ${isGenjutsu ? "bg-gradient-to-br from-neutral-800 via-zinc-900 to-lime-950" : "bg-gradient-to-br from-indigo-900 via-slate-800 to-teal-900"}`}>
+        <div className="text-xl font-extrabold tracking-wide text-lime-300">{banner.title}</div>
+        <div className="text-xs text-neutral-300">{banner.subtitle}</div>
       </div>
 
       {tab === "create" && (
-        <div className={`grid gap-1 rounded-2xl bg-white/[0.03] p-1 ${SUBS[model].length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
-          {SUBS[model].map((s) => (
+        <div className={`grid gap-1 rounded-2xl bg-white/[0.03] p-1 ${SUBS[activeModel].length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+          {SUBS[activeModel].map((s) => (
             <button
               key={s.id}
               type="button"
               onClick={() => setSub(s.id)}
-              className={`rounded-xl py-2 text-sm ${s.id === sub ? "bg-white/10 font-semibold text-white" : "text-neutral-400 hover:text-white"}`}
+              className={`rounded-xl py-2 text-sm ${s.id === activeSub ? "bg-white/10 font-semibold text-white" : "text-neutral-400 hover:text-white"}`}
             >
               {s.label}
             </button>
@@ -214,7 +270,8 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
       )}
       {sourceSlot && (
         <MediaSlot
-          label={tab === "motion" ? "Motion video" : "Source video"}
+          label={isGenjutsu ? (activeSub === "swap" ? "Add the video to edit" : "Add a reference video to extract motion") : "Source video"}
+          hint={isGenjutsu ? "Video duration: up to 30 seconds" : undefined}
           kind="video"
           required
           value={form.media.video_url}
@@ -225,89 +282,49 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
       )}
       {showRefs && (
         <ReferenceBox
-          title={tab === "motion" ? "Character / style images" : undefined}
+          title={isGenjutsu ? (activeSub === "swap" ? "Replacement objects" : "Character / style images") : undefined}
           refs={form.refs}
           limits={limits}
           onAdd={addRef}
           onRemove={removeRef}
-          onTag={(tag) => insert(tag)}
+          onTag={(tag) => {
+            if (isGenjutsu) setPromptOn(true);
+            insert(tag);
+          }}
           onBusyChange={onBusy}
           onDuration={onDuration}
         />
       )}
 
-      <PromptEditor
-        value={form.prompt}
-        onChange={(v) => set("prompt", v)}
-        tags={tags}
-        insertRequest={insertRequest}
-        placeholder={
-          tab === "motion"
-            ? "Optional: describe the new character, place or style…"
-            : tags.length > 0
-              ? "Describe the scene. Type @ to tag a reference, e.g. @Image1 rides past…"
-              : "Describe the scene, camera movement and mood…"
-        }
-        footer={
-          <>
-            {tags.length > 0 && (
-              <button type="button" onClick={() => insert("@", true)} className="flex items-center gap-1 rounded-lg bg-white/5 px-2 py-1 text-xs font-medium hover:bg-white/10">
-                <AtSign size={13} /> Elements
-              </button>
-            )}
-            {spec.audio && (
-              <button
-                type="button"
-                onClick={() => set("generate_audio", !form.generate_audio)}
-                className="flex items-center gap-1 rounded-lg bg-white/5 px-2 py-1 text-xs font-medium hover:bg-white/10"
-              >
-                {form.generate_audio ? <Volume2 size={13} /> : <VolumeX size={13} />} {form.generate_audio ? "On" : "Off"}
-              </button>
-            )}
-          </>
-        }
-      />
+      {isGenjutsu && (
+        <div className={rowClass}>
+          <span>Prompt</span>
+          <Switch on={promptOn} onToggle={() => setPromptOn((v) => !v)} label="Use a prompt" />
+        </div>
+      )}
+      {showPrompt && promptEditor}
       {missing.length > 0 && (
         <p className="flex items-center gap-1 text-xs text-amber-300">
           <AlertTriangle size={12} /> {missing.join(", ")} not found in your references
         </p>
       )}
 
-      <label className="relative block rounded-2xl bg-white/[0.03] px-3 py-2">
-        <div className="text-xs text-neutral-400">Model</div>
-        {tab === "create" ? (
-          <>
-            <select value={model} onChange={(e) => changeModel(e.target.value as CreateModel)} className={`${chipSelect} pr-6 text-sm font-semibold`}>
-              <option value="seedance" className="bg-neutral-900">
-                Seedance 2.5
-              </option>
-              <option value="kling" className="bg-neutral-900">
-                Kling 3.0
-              </option>
-            </select>
-            <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-          </>
-        ) : (
-          <div className="text-sm font-semibold">{MODEL_LABEL[spec.model]}</div>
-        )}
-      </label>
-
-      {spec.model === "kling" && (
-        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-white/[0.03] p-1">
-          {KLING_TIERS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTier(t.id)}
-              className={`rounded-xl py-1.5 text-sm ${t.id === tier ? "bg-white/10 font-semibold text-white" : "text-neutral-400 hover:text-white"}`}
-            >
-              {t.label}
-            </button>
-          ))}
+      {tab === "create" ? (
+        <PopoverSelect label="Model" value={model} options={MODEL_OPTIONS} onChange={changeModel} searchable width={340} />
+      ) : (
+        <div className="rounded-2xl bg-white/[0.03] px-3 py-2">
+          <div className="text-xs text-neutral-400">Model</div>
+          <div className="text-sm font-semibold">Seedance 2.5 Edit</div>
         </div>
       )}
 
-      {(duration !== null || spec.aspectRatios || spec.resolution) && (
+      {spec.model === "kling" ? (
+        <PopoverSelect label="Quality" value={tier} options={KLING_TIER_OPTIONS} onChange={setTier} width={220} />
+      ) : (
+        spec.resolution && <PopoverSelect label="Quality" value={form.resolution} options={qualityOptions} onChange={(r) => set("resolution", r)} width={220} />
+      )}
+
+      {(duration !== null || spec.aspectRatios) && (
         <div className="flex gap-2">
           {duration !== null && (
             <Chip icon={<Clock size={14} />} title="Duration">
@@ -324,17 +341,6 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
             <Chip icon={<RectangleHorizontal size={14} />} title="Aspect ratio">
               <select value={aspect} onChange={(e) => set("aspect_ratio", e.target.value)} className={chipSelect}>
                 {spec.aspectRatios.map((r) => (
-                  <option key={r} className="bg-neutral-900">
-                    {r}
-                  </option>
-                ))}
-              </select>
-            </Chip>
-          )}
-          {spec.resolution && (
-            <Chip icon={<Gem size={14} />} title="Resolution">
-              <select value={form.resolution} onChange={(e) => set("resolution", e.target.value)} className={chipSelect}>
-                {RESOLUTIONS.map((r) => (
                   <option key={r} className="bg-neutral-900">
                     {r}
                   </option>

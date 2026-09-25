@@ -2,10 +2,10 @@ import { DURATION, MODE_SPECS, type MediaKind, type Mode, type MultiField, type 
 import type { RefItem } from "./tags";
 import type { Job } from "./types";
 
-export type Tab = "create" | "edit" | "motion";
-export type CreateSub = "references" | "frames" | "extend";
-/** Models offered on the Create Video tab (Edit is Seedance, Motion Control is Genjutsu). */
-export type CreateModel = "seedance" | "kling";
+export type Tab = "create" | "edit";
+export type CreateSub = "references" | "frames" | "extend" | "motion" | "swap";
+/** Models offered on the Create Video tab (Edit Video is Seedance edit). */
+export type CreateModel = "seedance" | "kling" | "genjutsu";
 export type KlingTier = "std" | "pro" | "4k";
 
 export interface FormState {
@@ -53,8 +53,8 @@ export const KIND_FIELD: Record<MediaKind, MultiField> = {
 
 /** Maps the composer tabs to an endpoint; Seedance References without media is plain text-to-video. */
 export function resolveMode(tab: Tab, sub: CreateSub, refs: RefItem[], model: CreateModel = "seedance", tier: KlingTier = "std"): Mode {
-  if (tab === "motion") return "genjutsu";
   if (tab === "edit") return "edit";
+  if (model === "genjutsu") return sub === "swap" ? "genjutsu_swap" : "genjutsu";
   if (model === "kling") return sub === "frames" ? `kling_${tier}_image` : `kling_${tier}_text`;
   if (sub === "frames") return "image";
   if (sub === "extend") return "extend";
@@ -118,10 +118,20 @@ export function formFromJob(job: Pick<Job, "mode" | "params">): ComposerPreset {
     strs(p[KIND_FIELD[kind]]).map((url) => ({ kind, url })),
   );
   const fromImage = job.mode === "image" || job.mode.endsWith("_image");
+  const sub: CreateSub =
+    job.mode === "genjutsu_swap"
+      ? "swap"
+      : job.mode === "genjutsu"
+        ? "motion"
+        : fromImage
+          ? "frames"
+          : job.mode === "extend"
+            ? "extend"
+            : "references";
   return {
-    tab: spec.model === "genjutsu" ? "motion" : job.mode === "edit" ? "edit" : "create",
-    sub: fromImage ? "frames" : job.mode === "extend" ? "extend" : "references",
-    model: spec.model === "kling" ? "kling" : "seedance",
+    tab: job.mode === "edit" ? "edit" : "create",
+    sub,
+    model: spec.model,
     tier: job.mode.startsWith("kling_pro") ? "pro" : job.mode.startsWith("kling_4k") ? "4k" : "std",
     form: {
       prompt: str(p.prompt) ?? "",

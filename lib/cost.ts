@@ -1,7 +1,8 @@
 // Pricing from the Higgsfield model docs (before any customer discount):
 // - Seedance 2.5: tokens = ceil((input video s + generated video s) × width × height × 24 fps / 1024),
 //   $0.0214 per 1,000 tokens at 480p or 720p.
-// - Genjutsu Motion Transfer: per started second of input video, $0.318 at 480p, $0.681 at 720p.
+// - Genjutsu (Motion Transfer, Object Swap): per started second of input video. The console currently shows
+//   50% off: $0.159 at 480p; 720p assumed at the same discount, $0.3405 (list $0.318 / $0.681).
 // - Kling 3.0: per second of output, from the Higgsfield console price list (not in the API docs);
 //   these are the promotional (45% off) rates: std $0.0462, pro $0.0616, 4K $0.231 (list $0.084 / $0.112 / $0.42).
 import { MODE_SPECS, type Mode } from "./modes";
@@ -9,7 +10,7 @@ import type { FormState } from "./studio-input";
 import type { Job } from "./types";
 
 export const USD_PER_1K_TOKENS = 0.0214;
-export const GENJUTSU_USD_PER_SECOND: Record<string, number> = { "480p": 0.318, "720p": 0.681 };
+export const GENJUTSU_USD_PER_SECOND: Record<string, number> = { "480p": 0.159, "720p": 0.3405 };
 export const KLING_USD_PER_SECOND: Record<string, number> = { std: 0.0462, pro: 0.0616, "4k": 0.231 };
 
 function klingRate(mode: Mode): number {
@@ -80,7 +81,11 @@ export function estimateForForm(mode: Mode, form: FormState, durations: Record<s
     if (!d) return null;
     const seconds = Math.ceil(d);
     const rate = GENJUTSU_USD_PER_SECOND[form.resolution] ?? GENJUTSU_USD_PER_SECOND["720p"];
-    return { usd: round4(seconds * rate), detail: `${seconds}s of input video × $${rate}/s`, notes: [] };
+    return {
+      usd: round4(seconds * rate),
+      detail: `${seconds}s of input video × $${rate}/s`,
+      notes: ["Genjutsu rates are Higgsfield's current promo prices and may change."],
+    };
   }
 
   const notes: string[] = [];

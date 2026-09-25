@@ -10,6 +10,8 @@ import { acceptFor, uploadMedia } from "@/lib/upload-client";
 
 interface Props {
   label: string;
+  /** small helper text under the label in the empty slot */
+  hint?: string;
   kind: Extract<MediaKind, "image" | "video">;
   value?: string;
   required?: boolean;
@@ -19,7 +21,7 @@ interface Props {
 }
 
 /** A single upload slot: start frame, end frame or source video. Videos can be trimmed before upload. */
-export function MediaSlot({ label, kind, value, required, onChange, onBusyChange, onDuration }: Props) {
+export function MediaSlot({ label, hint, kind, value, required, onChange, onBusyChange, onDuration }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -70,6 +72,7 @@ export function MediaSlot({ label, kind, value, required, onChange, onBusyChange
             {busy && kind === "video" ? "Uploading…" : label}
             {required && !busy && <span className="text-red-400"> *</span>}
           </span>
+          {hint && !busy && <span className="text-[11px] text-neutral-500">{hint}</span>}
           <input
             type="file"
             className="hidden"

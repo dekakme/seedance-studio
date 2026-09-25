@@ -11,6 +11,7 @@ export const MODES = [
   "kling_4k_text",
   "kling_4k_image",
   "genjutsu",
+  "genjutsu_swap",
 ] as const;
 export type Mode = (typeof MODES)[number];
 
@@ -22,7 +23,7 @@ export type ModelFamily = "seedance" | "kling" | "genjutsu";
 export const MODEL_LABEL: Record<ModelFamily, string> = {
   seedance: "Seedance 2.5",
   kling: "Kling 3.0",
-  genjutsu: "Genjutsu",
+  genjutsu: "Higgsfield Genjutsu",
 };
 
 export const MODE_PATHS: Record<Mode, string> = {
@@ -38,6 +39,7 @@ export const MODE_PATHS: Record<Mode, string> = {
   kling_4k_text: "/kling-video/v3.0/4k/text-to-video",
   kling_4k_image: "/kling-video/v3.0/4k/image-to-video",
   genjutsu: "/higgsfield/genjutsu/motion-transfer/v1.0",
+  genjutsu_swap: "/higgsfield/genjutsu/object-swap/v1.0",
 };
 
 export const ASPECT_RATIOS = ["16:9", "4:3", "1:1", "3:4", "9:16", "21:9"] as const;
@@ -109,6 +111,25 @@ function kling(tier: "Std" | "Pro" | "4K", fromImage: boolean): ModeSpec {
   };
 }
 
+/** Motion Transfer and Object Swap share one input schema. */
+function genjutsu(label: string): ModeSpec {
+  return {
+    model: "genjutsu",
+    label,
+    promptRequired: false,
+    promptMax: 10_000,
+    duration: null,
+    aspectRatios: null,
+    resolution: true,
+    bitrate: false,
+    outputFormat: false,
+    audio: null,
+    cfgScale: false,
+    single: [{ field: "video_url", required: true }],
+    multi: { image_urls: { min: 1, max: 8 } },
+  };
+}
+
 // the source video counts toward Seedance's 10-video limit, hence 9 extra videos for edit/extend
 const SEEDANCE_EDIT_REFS = { image_urls: { max: 30 }, video_urls: { max: 9 }, audio_urls: { max: 10 } };
 
@@ -133,21 +154,8 @@ export const MODE_SPECS: Record<Mode, ModeSpec> = {
   kling_pro_image: kling("Pro", true),
   kling_4k_text: kling("4K", false),
   kling_4k_image: kling("4K", true),
-  genjutsu: {
-    model: "genjutsu",
-    label: "Motion Transfer",
-    promptRequired: false,
-    promptMax: 10_000,
-    duration: null,
-    aspectRatios: null,
-    resolution: true,
-    bitrate: false,
-    outputFormat: false,
-    audio: null,
-    cfgScale: false,
-    single: [{ field: "video_url", required: true }],
-    multi: { image_urls: { min: 1, max: 8 } },
-  },
+  genjutsu: genjutsu("Motion Transfer"),
+  genjutsu_swap: genjutsu("Object Swap"),
 };
 
 export const UPLOAD_TYPES = {

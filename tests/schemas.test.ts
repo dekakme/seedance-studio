@@ -120,4 +120,12 @@ describe("Genjutsu motion transfer", () => {
       payload: { video_url: vid, image_urls: [img], resolution: "720p" },
     });
   });
+
+  it("object swap takes the same inputs", () => {
+    expect(parseJobInput("genjutsu_swap", { video_url: vid, image_urls: [img], prompt: "swap the car", resolution: "480p" })).toEqual({
+      ok: true,
+      payload: { video_url: vid, image_urls: [img], prompt: "swap the car", resolution: "480p" },
+    });
+    expect(errorPaths(parseJobInput("genjutsu_swap", { video_url: vid }))).toContain("image_urls");
+  });
 });

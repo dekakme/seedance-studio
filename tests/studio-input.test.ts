@@ -14,12 +14,15 @@ describe("resolveMode", () => {
     expect(resolveMode("edit", "references", [])).toBe("edit");
   });
 
-  it("maps Kling and Motion Control", () => {
+  it("maps Kling and Genjutsu", () => {
     expect(resolveMode("create", "references", [], "kling", "std")).toBe("kling_std_text");
     expect(resolveMode("create", "frames", [], "kling", "pro")).toBe("kling_pro_image");
     expect(resolveMode("create", "extend", [], "kling", "std")).toBe("kling_std_text");
     expect(resolveMode("create", "frames", [], "kling", "4k")).toBe("kling_4k_image");
-    expect(resolveMode("motion", "references", [])).toBe("genjutsu");
+    expect(resolveMode("create", "motion", [], "genjutsu")).toBe("genjutsu");
+    expect(resolveMode("create", "swap", [], "genjutsu")).toBe("genjutsu_swap");
+    // a sub-tab from another model falls back to motion transfer
+    expect(resolveMode("create", "references", [], "genjutsu")).toBe("genjutsu");
   });
 });
 
@@ -29,6 +32,7 @@ describe("refLimits", () => {
     expect(refLimits("edit")).toEqual({ image: 30, video: 9, audio: 10 });
     expect(refLimits("image")).toEqual({});
     expect(refLimits("genjutsu")).toEqual({ image: 8 });
+    expect(refLimits("genjutsu_swap")).toEqual({ image: 8 });
     expect(refLimits("kling_std_text")).toEqual({});
   });
 });
@@ -95,10 +99,12 @@ describe("formFromJob", () => {
     expect(buildInput("reference", preset.form)).toEqual(params);
   });
 
-  it("restores Kling tier and Motion Control", () => {
+  it("restores Kling tier and Genjutsu mode", () => {
     const kling = formFromJob({ mode: "kling_pro_image", params: { image_url: img, sound: "off", duration: 7, cfg_scale: 0.3 } });
     expect([kling.tab, kling.sub, kling.model, kling.tier]).toEqual(["create", "frames", "kling", "pro"]);
     expect(buildInput("kling_pro_image", kling.form)).toEqual({ image_url: img, sound: "off", duration: 7, cfg_scale: 0.3 });
-    expect(formFromJob({ mode: "genjutsu", params: { video_url: vid, image_urls: [img] } }).tab).toBe("motion");
+    const swap = formFromJob({ mode: "genjutsu_swap", params: { video_url: vid, image_urls: [img] } });
+    expect([swap.tab, swap.sub, swap.model]).toEqual(["create", "swap", "genjutsu"]);
+    expect(formFromJob({ mode: "genjutsu", params: { video_url: vid, image_urls: [img] } }).sub).toBe("motion");
   });
 });

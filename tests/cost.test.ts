@@ -53,9 +53,9 @@ describe("other models", () => {
   it("prices Genjutsu per started second of input video", () => {
     const form = { ...DEFAULT_FORM, resolution: "720p", media: { video_url: vid } };
     expect(estimateForForm("genjutsu", form, {})).toBeNull();
-    // 5.2s rounds up to 6s × $0.681
-    expect(estimateForForm("genjutsu", form, { [vid]: 5.2 })?.usd).toBeCloseTo(4.086, 3);
-    expect(estimateForForm("genjutsu", { ...form, resolution: "480p" }, { [vid]: 5.2 })?.usd).toBeCloseTo(1.908, 3);
+    // 5.2s rounds up to 6s × promo rate ($0.3405 at 720p, $0.159 at 480p)
+    expect(estimateForForm("genjutsu", form, { [vid]: 5.2 })?.usd).toBeCloseTo(2.043, 3);
+    expect(estimateForForm("genjutsu_swap", { ...form, resolution: "480p" }, { [vid]: 5.2 })?.usd).toBeCloseTo(0.954, 3);
   });
 
   it("prices Kling per second of output by tier", () => {
