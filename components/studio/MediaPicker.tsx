@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UPLOAD_TYPES, type MediaKind } from "@/lib/modes";
+import { MAX_UPLOAD_BYTES, UPLOAD_TYPES, type MediaKind } from "@/lib/modes";
 
 interface Props {
   label: string;
@@ -12,6 +12,8 @@ interface Props {
   onChange: (update: (prev: string[]) => string[]) => void;
   /** +n when uploads start, -1 as each finishes */
   onBusyChange: (delta: number) => void;
+  /** reports a video's length in seconds once its metadata loads (used for the cost estimate) */
+  onDuration?: (url: string, seconds: number) => void;
 }
 
 async function uploadFile(file: File): Promise<string> {
@@ -23,22 +25,41 @@ async function uploadFile(file: File): Promise<string> {
   return body.url;
 }
 
-function Preview({ kind, url }: { kind: MediaKind; url: string }) {
+function Preview({ kind, url, onDuration }: { kind: MediaKind; url: string; onDuration?: Props["onDuration"] }) {
   // eslint-disable-next-line @next/next/no-img-element -- remote Higgsfield CDN URLs, no optimization needed
   if (kind === "image") return <img src={url} alt="" className="h-24 w-24 rounded object-cover" />;
-  if (kind === "video") return <video src={url} muted className="h-24 w-32 rounded object-cover" />;
+  if (kind === "video") {
+    return (
+      <video
+        src={url}
+        muted
+        preload="metadata"
+        onLoadedMetadata={(e) => onDuration?.(url, e.currentTarget.duration)}
+        className="h-24 w-32 rounded object-cover"
+      />
+    );
+  }
   return <audio src={url} controls className="w-56" />;
 }
 
-export function MediaPicker({ label, kind, max, required, value, onChange, onBusyChange }: Props) {
+export function MediaPicker({ label, kind, max, required, value, onChange, onBusyChange, onDuration }: Props) {
   const [pending, setPending] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const room = max - value.length - pending;
 
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
-    const picked = Array.from(files).slice(0, Math.max(room, 0));
-    setError(files.length > picked.length ? `At most ${max} file(s)` : null);
+    const tooBig = Array.from(files).filter((f) => f.size > MAX_UPLOAD_BYTES);
+    const picked = Array.from(files)
+      .filter((f) => f.size <= MAX_UPLOAD_BYTES)
+      .slice(0, Math.max(room, 0));
+    setError(
+      tooBig.length > 0
+        ? `${tooBig.map((f) => f.name).join(", ")} is larger than 200 MB`
+        : files.length > picked.length
+          ? `At most ${max} file(s)`
+          : null,
+    );
     setPending((n) => n + picked.length);
     onBusyChange(picked.length);
     for (const file of picked) {
@@ -69,7 +90,7 @@ export function MediaPicker({ label, kind, max, required, value, onChange, onBus
       <div className="flex flex-wrap items-center gap-3">
         {value.map((url) => (
           <div key={url} className="relative">
-            <Preview kind={kind} url={url} />
+            <Preview kind={kind} url={url} onDuration={onDuration} />
             <button
               type="button"
               onClick={() => onChange((prev) => prev.filter((u) => u !== url))}

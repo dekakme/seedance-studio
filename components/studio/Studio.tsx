@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { MediaPicker } from "./MediaPicker";
+import { estimateForForm, formatUsd } from "@/lib/cost";
 import {
   ASPECT_RATIOS,
   BITRATE_MODES,
@@ -48,7 +49,11 @@ export function Studio({ prefill }: { prefill: StudioPrefill }) {
   const [uploading, setUploading] = useState(0);
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  // video URL -> length in seconds, reported by the previews; input video is billed too
+  const [durations, setDurations] = useState<Record<string, number>>({});
   const spec = MODE_SPECS[mode];
+  const estimate = estimateForForm(mode, form, durations);
+  const onDuration = (url: string, seconds: number) => setDurations((d) => (d[url] === seconds ? d : { ...d, [url]: seconds }));
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((f) => ({ ...f, [key]: value }));
   const mediaUpdater = (field: SingleField | MultiField) => (update: (prev: string[]) => string[]) =>
@@ -126,6 +131,7 @@ export function Studio({ prefill }: { prefill: StudioPrefill }) {
           value={form.media[field] ?? []}
           onChange={mediaUpdater(field)}
           onBusyChange={(d) => setUploading((n) => n + d)}
+          onDuration={onDuration}
         />
       ))}
       {(Object.entries(spec.multi) as [MultiField, number][]).map(([field, max]) => (
@@ -137,6 +143,7 @@ export function Studio({ prefill }: { prefill: StudioPrefill }) {
           value={form.media[field] ?? []}
           onChange={mediaUpdater(field)}
           onBusyChange={(d) => setUploading((n) => n + d)}
+          onDuration={onDuration}
         />
       ))}
 
@@ -203,12 +210,29 @@ export function Studio({ prefill }: { prefill: StudioPrefill }) {
         </ul>
       )}
 
-      <button
-        disabled={busy || uploading > 0}
-        className="self-start rounded-lg bg-white px-6 py-2 font-medium text-black disabled:opacity-50"
-      >
-        {uploading > 0 ? "Waiting for uploads…" : busy ? "Submitting…" : "Generate"}
-      </button>
+      <div className="flex flex-wrap items-center gap-4">
+        <button
+          disabled={busy || uploading > 0}
+          className="rounded-lg bg-white px-6 py-2 font-medium text-black disabled:opacity-50"
+        >
+          {uploading > 0 ? "Waiting for uploads…" : busy ? "Submitting…" : "Generate"}
+        </button>
+        <div className="text-sm">
+          {estimate ? (
+            <span className="text-neutral-200">
+              Estimated cost: <strong>≈ {formatUsd(estimate.usd)}</strong>{" "}
+              <span className="text-neutral-500">({estimate.tokens.toLocaleString()} video tokens)</span>
+            </span>
+          ) : (
+            <span className="text-neutral-500">Estimated cost appears once the source video is added.</span>
+          )}
+          {estimate?.notes.map((n) => (
+            <p key={n} className="text-xs text-neutral-500">
+              {n}
+            </p>
+          ))}
+        </div>
+      </div>
     </form>
   );
 }

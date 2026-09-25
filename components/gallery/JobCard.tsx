@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { estimateJobCost, formatUsd } from "@/lib/cost";
 import { MODE_SPECS } from "@/lib/modes";
 import { isTerminal, type Job, type JobStatus } from "@/lib/types";
 
@@ -70,6 +71,8 @@ export function JobCard({ initial }: { initial: Job }) {
   const prompt = typeof job.params.prompt === "string" ? job.params.prompt : "";
   const videoSrc = job.local_path ? `/api/videos/${job.id}` : job.remote_url;
   const reuse = `/?${new URLSearchParams({ mode: job.mode, prompt })}`;
+  // nothing is billed when the submit itself failed
+  const cost = job.status === "error" ? null : estimateJobCost(job);
 
   return (
     <article id={`job-${job.id}`} className="flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
@@ -89,6 +92,12 @@ export function JobCard({ initial }: { initial: Job }) {
       )}
 
       {prompt && <p className="line-clamp-3 text-sm text-neutral-300">{prompt}</p>}
+      {cost && (
+        <p className="text-xs text-neutral-500">
+          Est. cost ≈ {formatUsd(cost.usd)}
+          {cost.partial && " + input video"}
+        </p>
+      )}
       {job.error && <p className="text-sm text-red-400">{job.error}</p>}
       {actionError && <p className="text-sm text-red-400">{actionError}</p>}
 

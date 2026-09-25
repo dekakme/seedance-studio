@@ -16,5 +16,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // /api/uploads checks the session itself: running proxy on it would buffer (and cap at 10MB) every upload
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/uploads).*)"],
 };
