@@ -17,6 +17,7 @@ import { Lightbox, type PreviewItem } from "./Lightbox";
 import { MediaThumb } from "./MediaThumb";
 import { useElapsed, useJob } from "./useJob";
 import { estimateJobCost, formatUsd } from "@/lib/cost";
+import { catalogIdOf, isCatalogMode, type CatalogLabels } from "@/lib/catalog";
 import { MODEL_LABEL, MODE_SPECS, type MediaKind } from "@/lib/modes";
 import { splitByTags } from "@/lib/tags";
 import { isTerminal, type Job, type JobStatus } from "@/lib/types";
@@ -39,6 +40,8 @@ interface Props {
   onExtend: (job: Job) => void;
   onDeleted: (id: string) => void;
   onOpen: (id: string) => void;
+  /** family / workflow names for catalog jobs, keyed by model id */
+  catalogLabels: CatalogLabels;
 }
 
 // fixed locale so server and browser render the same text
@@ -90,7 +93,7 @@ function StatusPill({ status }: { status: JobStatus }) {
   return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS[status].className}`}>{STATUS[status].label}</span>;
 }
 
-export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDeleted, onOpen }: Props) {
+export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDeleted, onOpen, catalogLabels }: Props) {
   const [job, setJob] = useJob(initial);
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
@@ -182,13 +185,18 @@ export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDelete
     );
   }
 
-  const spec = MODE_SPECS[job.mode];
+  // curated modes carry their own spec; catalog jobs are labelled from the synced catalog
+  const spec = isCatalogMode(job.mode) ? null : MODE_SPECS[job.mode];
+  const catalogLabel = isCatalogMode(job.mode) ? catalogLabels[catalogIdOf(job.mode)] : undefined;
+  const modelLabel = spec ? MODEL_LABEL[spec.model] : (catalogLabel?.family ?? "Higgsfield model");
+  const workflowLabel = spec ? spec.label : (catalogLabel?.workflow ?? job.mode.slice("catalog:".length));
+  const hasAudio = spec ? !!spec.audio : "generate_audio" in p || "sound" in p;
   const refs = paramRefs(p);
   const chips = [
     str(p.resolution),
-    typeof p.duration === "number" ? `${p.duration}s` : "Auto length",
+    typeof p.duration === "number" || typeof p.duration === "string" ? `${p.duration}s` : "Auto length",
     str(p.aspect_ratio) ?? "Auto frame",
-    spec.audio ? (p.generate_audio === false || p.sound === "off" ? "No audio" : "Audio") : undefined,
+    hasAudio ? (p.generate_audio === false || p.sound === "off" ? "No audio" : "Audio") : undefined,
     typeof p.cfg_scale === "number" ? `CFG ${p.cfg_scale}` : undefined,
   ].filter((c): c is string => !!c);
 
@@ -216,13 +224,13 @@ export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDelete
       <aside className="flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-4">
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2 py-1 text-xs font-semibold">
-            <BarChart3 size={12} className="text-lime-300" /> {MODEL_LABEL[spec.model]}
+            <BarChart3 size={12} className="text-lime-300" /> {modelLabel}
           </span>
           <StatusPill status={job.status} />
         </div>
         {/* the browser's time zone can differ from the server's, so let the client render its own time */}
         <div className="text-[11px] uppercase tracking-wide text-neutral-500" suppressHydrationWarning>
-          {spec.label} · {DATE_FORMAT.format(new Date(job.created_at))}
+          {workflowLabel} · {DATE_FORMAT.format(new Date(job.created_at))}
         </div>
         {prompt ? (
           <p className="max-h-48 overflow-y-auto whitespace-pre-wrap text-sm leading-6 text-neutral-300">

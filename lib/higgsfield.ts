@@ -38,6 +38,8 @@ export interface UploadTarget {
 
 export interface HiggsfieldClient {
   submit(mode: Mode, payload: Record<string, unknown>): Promise<SubmitResult>;
+  /** submit to a model by its API path, e.g. "/alibaba/wan-3.0/text-to-video" (catalog models) */
+  submitPath(path: string, payload: Record<string, unknown>): Promise<SubmitResult>;
   getStatus(statusUrl: string): Promise<StatusResult>;
   cancel(cancelUrl: string): Promise<boolean>;
   generateUploadUrl(contentType: string): Promise<UploadTarget>;
@@ -111,7 +113,11 @@ export function createHiggsfieldClient(opts: ClientOptions): HiggsfieldClient {
 
   const client: HiggsfieldClient = {
     async submit(mode, payload) {
-      return json<SubmitResult>(await call(`${baseUrl}${MODE_PATHS[mode]}`, "POST", payload));
+      return client.submitPath(MODE_PATHS[mode], payload);
+    },
+    async submitPath(path, payload) {
+      if (!/^\/[\w.\-/]+$/.test(path) || path.includes("..")) throw new Error(`Invalid model path: ${path}`);
+      return json<SubmitResult>(await call(`${baseUrl}${path}`, "POST", payload));
     },
     async getStatus(statusUrl) {
       const raw = await json<RawStatus>(await call(statusUrl, "GET"));

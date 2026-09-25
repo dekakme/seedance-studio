@@ -37,6 +37,9 @@ interface JsonSchemaProp {
   items?: { type?: string; format?: string };
 }
 
+/** Small id -> names map the history needs to label catalog jobs without loading every schema. */
+export type CatalogLabels = Record<string, { family: string; workflow: string }>;
+
 /** Job modes for catalog models are "catalog:<model id>". */
 export type CatalogMode = `catalog:${string}`;
 export const CATALOG_PREFIX = "catalog:";

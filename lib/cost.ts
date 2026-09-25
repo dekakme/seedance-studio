@@ -5,6 +5,7 @@
 //   50% off: $0.159 at 480p; 720p assumed at the same discount, $0.3405 (list $0.318 / $0.681).
 // - Kling 3.0: per second of output, from the Higgsfield console price list (not in the API docs);
 //   these are the promotional (45% off) rates: std $0.0462, pro $0.0616, 4K $0.231 (list $0.084 / $0.112 / $0.42).
+import { isCatalogMode } from "./catalog";
 import { MODE_SPECS, type Mode } from "./modes";
 import type { FormState } from "./studio-input";
 import type { Job } from "./types";
@@ -145,6 +146,8 @@ export function estimateForForm(mode: Mode, form: FormState, durations: Record<s
  * output second. Edit and Genjutsu jobs return null (they are priced by input video length).
  */
 export function estimateJobCost(job: Pick<Job, "mode" | "params">): { usd: number; partial: boolean } | null {
+  // catalog models only have free-form pricing text, shown in the composer instead
+  if (isCatalogMode(job.mode)) return null;
   const model = MODE_SPECS[job.mode].model;
   const p = job.params;
   if (model === "genjutsu" || typeof p.duration !== "number") return null;

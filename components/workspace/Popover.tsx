@@ -102,6 +102,8 @@ export interface PopoverOption<T extends string> {
   meta?: string[];
   description?: string;
   icon?: ReactNode;
+  /** options with a group get a heading whenever the group changes */
+  group?: string;
 }
 
 const BADGE_CLASS = { TOP: "bg-blue-500 text-white", NEW: "bg-[#d7ff3a] text-black" } as const;
@@ -130,7 +132,8 @@ export function PopoverSelect<T extends string>({ label, value, options, onChang
   const { triggerRef, panelRef, pos, close, toggle } = usePopover(width, variant === "chip" ? "above" : "beside");
   const [query, setQuery] = useState("");
   const current = options.find((o) => o.value === value) ?? options[0];
-  const shown = options.filter((o) => o.label.toLowerCase().includes(query.trim().toLowerCase()));
+  const q = query.trim().toLowerCase();
+  const shown = options.filter((o) => `${o.group ?? ""} ${o.label} ${(o.meta ?? []).join(" ")}`.toLowerCase().includes(q));
 
   const trigger =
     variant === "chip" ? (
@@ -194,9 +197,12 @@ export function PopoverSelect<T extends string>({ label, value, options, onChang
             <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search…" className="w-full bg-transparent text-white outline-none placeholder:text-neutral-500" />
           </label>
         )}
-        {shown.map((o) => (
+        {shown.map((o, i) => (
+          <div key={o.value}>
+          {o.group && o.group !== shown[i - 1]?.group && (
+            <div className="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">{o.group}</div>
+          )}
           <button
-            key={o.value}
             type="button"
             role="option"
             aria-selected={o.value === value}
@@ -225,6 +231,7 @@ export function PopoverSelect<T extends string>({ label, value, options, onChang
             </span>
             {o.value === value && <Check size={16} className="shrink-0 text-lime-300" />}
           </button>
+          </div>
         ))}
         {shown.length === 0 && <p className="px-3 py-4 text-sm text-neutral-500">No matches.</p>}
       </Panel>

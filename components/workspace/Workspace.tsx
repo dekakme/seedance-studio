@@ -4,12 +4,13 @@ import { History, LayoutGrid, List } from "lucide-react";
 import { useState } from "react";
 import { Composer } from "./Composer";
 import { FeedItem } from "./FeedItem";
+import type { CatalogLabels } from "@/lib/catalog";
 import { DEFAULT_FORM, formFromJob, type ComposerPreset } from "@/lib/studio-input";
 import type { Job } from "@/lib/types";
 
 type View = "list" | "grid";
 
-export function Workspace({ initialJobs }: { initialJobs: Job[] }) {
+export function Workspace({ initialJobs, catalogLabels }: { initialJobs: Job[]; catalogLabels: CatalogLabels }) {
   const [jobs, setJobs] = useState(initialJobs);
   const [view, setView] = useState<View>("list");
   // remounts the composer with new values when a job is reused or extended
@@ -63,6 +64,7 @@ export function Workspace({ initialJobs }: { initialJobs: Job[] }) {
                 onCreated={onCreated}
                 onDeleted={onDeleted}
                 onOpen={onOpen}
+                catalogLabels={catalogLabels}
                 onReuse={(j) => load(formFromJob(j))}
                 onExtend={(j) =>
                   load({

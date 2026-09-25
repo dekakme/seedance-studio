@@ -1,4 +1,8 @@
+import type { CatalogMode } from "./catalog";
 import type { Mode } from "./modes";
+
+/** A curated mode (tailored UI) or "catalog:<model id>" for any other synced model. */
+export type JobMode = Mode | CatalogMode;
 
 export const JOB_STATUSES = ["queued", "in_progress", "completed", "failed", "nsfw", "canceled", "error"] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];
@@ -9,7 +13,7 @@ export function isTerminal(status: JobStatus): boolean {
 
 export interface Job {
   id: string;
-  mode: Mode;
+  mode: JobMode;
   /** exact payload sent to Higgsfield */
   params: Record<string, unknown>;
   /** browser-generated token that makes submissions idempotent */

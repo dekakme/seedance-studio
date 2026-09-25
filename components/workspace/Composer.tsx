@@ -16,13 +16,16 @@ import {
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { CatalogForm } from "./CatalogForm";
+import { RatioIcon, Switch } from "./controls";
 import { MediaSlot } from "./MediaSlot";
 import { DurationPicker, PopoverSelect, type PopoverOption } from "./Popover";
 import { PromptEditor, type InsertRequest } from "./PromptEditor";
 import { ReferenceBox } from "./ReferenceBox";
 import { GENJUTSU_USD_PER_SECOND, KLING_USD_PER_SECOND, estimateForForm, formatUsd } from "@/lib/cost";
-import { MODEL_LABEL, MODE_SPECS, OUTPUT_FORMATS, RESOLUTIONS, type SingleField } from "@/lib/modes";
+import { catalogIdOf, isCatalogMode, type CatalogEntry } from "@/lib/catalog";
+import { MODEL_LABEL, MODE_PATHS, MODE_SPECS, OUTPUT_FORMATS, RESOLUTIONS, type SingleField } from "@/lib/modes";
 import {
   DEFAULT_FORM,
   buildInput,
@@ -63,12 +66,14 @@ const SUBS: Record<CreateModel, { id: CreateSub; label: string }[]> = {
   ],
 };
 
-const MODEL_OPTIONS: PopoverOption<CreateModel>[] = [
-  { value: "seedance", label: "Seedance 2.5", badge: "TOP", meta: ["720p", "4s–30s", "Audio"] },
-  { value: "kling", label: "Kling 3.0", meta: ["Std · Pro · 4K", "3s–15s", "Audio"] },
-  { value: "genjutsu", label: "Higgsfield Genjutsu", badge: "NEW", meta: ["720p", "1s–30s", "Motion · Swap"] },
-  { value: "minimax", label: "MiniMax H3", meta: ["2K", "5s–15s", "$0.13/s"] },
+// curated models with tailored controls; every other synced model is listed after them from the catalog
+const MODEL_OPTIONS: PopoverOption<string>[] = [
+  { value: "seedance", label: "Seedance 2.5", badge: "TOP", meta: ["720p", "4s–30s", "Audio"], group: "Featured" },
+  { value: "kling", label: "Kling 3.0", meta: ["Std · Pro · 4K", "3s–15s", "Audio"], group: "Featured" },
+  { value: "genjutsu", label: "Higgsfield Genjutsu", badge: "NEW", meta: ["720p", "1s–30s", "Motion · Swap"], group: "Featured" },
+  { value: "minimax", label: "MiniMax H3", meta: ["2K", "5s–15s", "$0.13/s"], group: "Featured" },
 ];
+const CURATED_PATHS = new Set<string>(Object.values(MODE_PATHS));
 
 const KLING_TIER_OPTIONS: PopoverOption<KlingTier>[] = (["std", "pro", "4k"] as const).map((t) => ({
   value: t,
@@ -81,25 +86,6 @@ const BITRATE_OPTIONS: PopoverOption<string>[] = [
   { value: "standard", label: "Standard", description: "More compression · smaller size", icon: <Zap size={16} /> },
 ];
 
-/** Small outline box drawn at the given aspect ratio, for the aspect ratio list. */
-function RatioIcon({ ratio }: { ratio: string }) {
-  const [w, h] = ratio.split(":").map(Number);
-  // "auto" / "adaptive" (MiniMax): no fixed shape
-  if (!w || !h) {
-    return (
-      <span className="flex h-4 w-4 items-center justify-center">
-        <span className="h-3.5 w-3.5 rounded-[2px] border-[1.5px] border-dashed border-current" />
-      </span>
-    );
-  }
-  const scale = 16 / Math.max(w, h);
-  return (
-    <span className="flex h-4 w-4 items-center justify-center">
-      <span className="rounded-[2px] border-[1.5px] border-current" style={{ width: Math.max(4, w * scale), height: Math.max(4, h * scale) }} />
-    </span>
-  );
-}
-
 const FRAME_LABEL: Partial<Record<SingleField, string>> = {
   image_url: "Start frame",
   end_image_url: "End frame",
@@ -107,14 +93,6 @@ const FRAME_LABEL: Partial<Record<SingleField, string>> = {
 };
 
 const rowClass = "flex items-center justify-between rounded-2xl bg-white/[0.03] px-3 py-2.5 text-sm font-medium";
-
-function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
-  return (
-    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onToggle} className={`relative h-5 w-9 rounded-full transition ${on ? "bg-[#d7ff3a]" : "bg-white/15"}`}>
-      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${on ? "left-[18px] bg-black" : "left-0.5"}`} />
-    </button>
-  );
-}
 
 export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCreated: (job: Job) => void }) {
   const router = useRouter();
@@ -133,6 +111,19 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
   // one token per intended generation: a retry after a network error reuses it, so the server can dedupe
   const [clientToken, setClientToken] = useState(() => crypto.randomUUID());
   const [insertRequest, setInsertRequest] = useState<InsertRequest | null>(null);
+  // any non-curated model from the synced catalog; the catalog is fetched once for the model picker
+  const [catalogId, setCatalogId] = useState<string | null>(preset?.catalog?.id ?? null);
+  const [catalog, setCatalog] = useState<CatalogEntry[] | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/catalog")
+      .then((r) => (r.ok ? r.json() : { models: [] }))
+      .then((b: { models: CatalogEntry[] }) => alive && setCatalog(b.models))
+      .catch(() => alive && setCatalog([]));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // Edit Video is always Seedance; a sub-tab left over from another model falls back to the first one
   const activeModel: CreateModel = tab === "edit" ? "seedance" : model;
@@ -177,6 +168,48 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
     setModel(next);
     if (!SUBS[next].some((s) => s.id === sub)) setSub(SUBS[next][0].id);
   }
+
+  const modelOptions: PopoverOption<string>[] = [
+    ...MODEL_OPTIONS,
+    ...(catalog ?? [])
+      .filter((e) => !CURATED_PATHS.has(`/${e.id}`))
+      .map((e) => ({ value: `catalog:${e.id}`, label: e.workflow, group: e.family, meta: [e.category].filter(Boolean) })),
+  ];
+  const pickModel = (value: string) => {
+    if (isCatalogMode(value)) {
+      setCatalogId(catalogIdOf(value));
+    } else {
+      setCatalogId(null);
+      changeModel(value as CreateModel);
+    }
+  };
+  const modelPicker =
+    tab === "create" ? (
+      <PopoverSelect label="Model" value={catalogId ? `catalog:${catalogId}` : model} options={modelOptions} onChange={pickModel} searchable width={360} />
+    ) : (
+      <div className="rounded-2xl bg-white/[0.03] px-3 py-2">
+        <div className="text-xs text-neutral-400">Model</div>
+        <div className="text-sm font-semibold">Seedance 2.5 Edit</div>
+      </div>
+    );
+  const tabsNode = (
+    <div className="flex gap-4 px-1 text-sm font-semibold">
+      {TABS.map((t) => (
+        <button
+          key={t.id}
+          type="button"
+          onClick={() => {
+            setTab(t.id);
+            // Edit Video is Seedance's editor, so leave any catalog model
+            if (t.id === "edit") setCatalogId(null);
+          }}
+          className={`border-b-2 pb-1 ${t.id === tab ? "border-white text-white" : "border-transparent text-neutral-500 hover:text-neutral-300"}`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -250,20 +283,41 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
     />
   );
 
+  if (tab === "create" && catalogId) {
+    const entry = catalog?.find((e) => e.id === catalogId);
+    const header = (
+      <>
+        {tabsNode}
+        <div className="rounded-2xl bg-gradient-to-br from-slate-800 via-zinc-900 to-indigo-950 p-4">
+          <div className="text-xl font-extrabold uppercase tracking-wide text-lime-300">{entry?.family ?? "Loading…"}</div>
+          <div className="text-xs text-neutral-300">{entry ? `${entry.workflow} · ${entry.category}` : "Fetching the model catalog"}</div>
+        </div>
+      </>
+    );
+    if (!entry) {
+      return (
+        <div className="flex flex-col gap-3">
+          {header}
+          {catalog && <p className="text-sm text-red-300">This model is no longer in the catalog. Pick another one.</p>}
+          {modelPicker}
+        </div>
+      );
+    }
+    return (
+      <CatalogForm
+        key={entry.id}
+        entry={entry}
+        preset={preset?.catalog?.id === entry.id ? preset.catalog : undefined}
+        header={header}
+        modelPicker={modelPicker}
+        onCreated={onCreated}
+      />
+    );
+  }
+
   return (
     <form onSubmit={submit} className="flex flex-col gap-3">
-      <div className="flex gap-4 px-1 text-sm font-semibold">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            className={`border-b-2 pb-1 ${t.id === tab ? "border-white text-white" : "border-transparent text-neutral-500 hover:text-neutral-300"}`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {tabsNode}
 
       <div className={`rounded-2xl p-4 ${isGenjutsu ? "bg-gradient-to-br from-neutral-800 via-zinc-900 to-lime-950" : "bg-gradient-to-br from-indigo-900 via-slate-800 to-teal-900"}`}>
         <div className="text-xl font-extrabold tracking-wide text-lime-300">{banner.title}</div>
@@ -342,14 +396,7 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
         </p>
       )}
 
-      {tab === "create" ? (
-        <PopoverSelect label="Model" value={model} options={MODEL_OPTIONS} onChange={changeModel} searchable width={340} />
-      ) : (
-        <div className="rounded-2xl bg-white/[0.03] px-3 py-2">
-          <div className="text-xs text-neutral-400">Model</div>
-          <div className="text-sm font-semibold">Seedance 2.5 Edit</div>
-        </div>
-      )}
+      {modelPicker}
 
       {/* Seedance shows resolution as a chip; Genjutsu and Kling tiers get a Quality row, like Higgsfield */}
       {spec.model === "kling" && <PopoverSelect label="Quality" value={tier} options={KLING_TIER_OPTIONS} onChange={setTier} width={220} />}

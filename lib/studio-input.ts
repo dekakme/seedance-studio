@@ -1,4 +1,5 @@
 import { DURATION, MODE_SPECS, type MediaKind, type Mode, type MultiField, type SingleField } from "./modes";
+import { catalogIdOf, isCatalogMode } from "./catalog";
 import type { RefItem } from "./tags";
 import type { Job } from "./types";
 
@@ -30,6 +31,8 @@ export interface ComposerPreset {
   model: CreateModel;
   tier: KlingTier;
   form: FormState;
+  /** set to open the generic form for a catalog model instead */
+  catalog?: { id: string; values: Record<string, unknown>; refs: RefItem[] };
 }
 
 export const DEFAULT_FORM: FormState = {
@@ -112,15 +115,20 @@ const strs = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is st
 /** Rebuilds composer state from a stored job, for "Reuse". */
 export function formFromJob(job: Pick<Job, "mode" | "params">): ComposerPreset {
   const p = job.params;
+  const refs: RefItem[] = (Object.keys(KIND_FIELD) as MediaKind[]).flatMap((kind) =>
+    strs(p[KIND_FIELD[kind]]).map((url) => ({ kind, url })),
+  );
+  if (isCatalogMode(job.mode)) {
+    // reference lists come back through `refs`; everything else is a plain field value
+    const values = Object.fromEntries(Object.entries(p).filter(([k]) => !Object.values(KIND_FIELD).includes(k as MultiField)));
+    return { tab: "create", sub: "references", model: "seedance", tier: "std", form: DEFAULT_FORM, catalog: { id: catalogIdOf(job.mode), values, refs } };
+  }
   const spec = MODE_SPECS[job.mode];
   const media: FormState["media"] = {};
   for (const field of ["image_url", "end_image_url", "last_image_url", "video_url"] as const) {
     const url = str(p[field]);
     if (url) media[field] = url;
   }
-  const refs: RefItem[] = (Object.keys(KIND_FIELD) as MediaKind[]).flatMap((kind) =>
-    strs(p[KIND_FIELD[kind]]).map((url) => ({ kind, url })),
-  );
   const fromImage = job.mode === "image" || job.mode.endsWith("_image");
   const sub: CreateSub =
     job.mode === "genjutsu_swap"

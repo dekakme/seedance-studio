@@ -1,6 +1,6 @@
 "use client";
 
-import { Film, ImageIcon, Loader2, Maximize2, X } from "lucide-react";
+import { Film, ImageIcon, Loader2, Maximize2, Music, X } from "lucide-react";
 import { useState } from "react";
 import { Lightbox } from "./Lightbox";
 import { MediaThumb } from "./MediaThumb";
@@ -12,7 +12,7 @@ interface Props {
   label: string;
   /** small helper text under the label in the empty slot */
   hint?: string;
-  kind: Extract<MediaKind, "image" | "video">;
+  kind: MediaKind;
   value?: string;
   required?: boolean;
   onChange: (url: string | undefined) => void;
@@ -26,7 +26,7 @@ export function MediaSlot({ label, hint, kind, value, required, onChange, onBusy
   const [error, setError] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const [trimDialog, trim] = useTrimmer();
-  const Icon = kind === "image" ? ImageIcon : Film;
+  const Icon = kind === "image" ? ImageIcon : kind === "video" ? Film : Music;
 
   async function onFile(file: File | undefined) {
     if (!file) return;
