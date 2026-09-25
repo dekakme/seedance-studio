@@ -1,14 +1,28 @@
 "use client";
 
-import { AlertTriangle, AtSign, Clock, FileVideo, Gauge, Loader2, RectangleHorizontal, SlidersHorizontal, Sparkles, Volume2, VolumeX } from "lucide-react";
+import {
+  AlertTriangle,
+  AtSign,
+  Clock,
+  FileVideo,
+  Gauge,
+  Gem,
+  Loader2,
+  RectangleHorizontal,
+  SlidersHorizontal,
+  Sparkles,
+  Volume2,
+  VolumeX,
+  Zap,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import { MediaSlot } from "./MediaSlot";
-import { PopoverSelect, type PopoverOption } from "./Popover";
+import { DurationPicker, PopoverSelect, type PopoverOption } from "./Popover";
 import { PromptEditor, type InsertRequest } from "./PromptEditor";
 import { ReferenceBox } from "./ReferenceBox";
 import { GENJUTSU_USD_PER_SECOND, KLING_USD_PER_SECOND, estimateForForm, formatUsd } from "@/lib/cost";
-import { BITRATE_MODES, MODEL_LABEL, MODE_SPECS, OUTPUT_FORMATS, RESOLUTIONS, type SingleField } from "@/lib/modes";
+import { MODEL_LABEL, MODE_SPECS, OUTPUT_FORMATS, RESOLUTIONS, type SingleField } from "@/lib/modes";
 import {
   DEFAULT_FORM,
   buildInput,
@@ -57,23 +71,29 @@ const KLING_TIER_OPTIONS: PopoverOption<KlingTier>[] = (["std", "pro", "4k"] as 
   meta: [`$${KLING_USD_PER_SECOND[t]}/s`],
 }));
 
+const BITRATE_OPTIONS: PopoverOption<string>[] = [
+  { value: "high", label: "High", description: "Less compression · larger size", icon: <Sparkles size={16} /> },
+  { value: "standard", label: "Standard", description: "More compression · smaller size", icon: <Zap size={16} /> },
+];
+
+/** Small outline box drawn at the given aspect ratio, for the aspect ratio list. */
+function RatioIcon({ ratio }: { ratio: string }) {
+  const [w, h] = ratio.split(":").map(Number);
+  const scale = 16 / Math.max(w, h);
+  return (
+    <span className="flex h-4 w-4 items-center justify-center">
+      <span className="rounded-[2px] border-[1.5px] border-current" style={{ width: Math.max(4, w * scale), height: Math.max(4, h * scale) }} />
+    </span>
+  );
+}
+
 const FRAME_LABEL: Partial<Record<SingleField, string>> = {
   image_url: "Start frame",
   end_image_url: "End frame",
   last_image_url: "End frame",
 };
 
-const chipSelect = "w-full cursor-pointer appearance-none bg-transparent outline-none";
 const rowClass = "flex items-center justify-between rounded-2xl bg-white/[0.03] px-3 py-2.5 text-sm font-medium";
-
-function Chip({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
-  return (
-    <label title={title} className="flex min-w-0 flex-1 items-center gap-1.5 rounded-xl bg-white/[0.05] px-3 py-2 text-sm font-semibold hover:bg-white/[0.08]">
-      <span className="shrink-0 text-neutral-400">{icon}</span>
-      {children}
-    </label>
-  );
-}
 
 function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
   return (
@@ -318,52 +338,52 @@ export function Composer({ preset, onCreated }: { preset?: ComposerPreset; onCre
         </div>
       )}
 
-      {spec.model === "kling" ? (
-        <PopoverSelect label="Quality" value={tier} options={KLING_TIER_OPTIONS} onChange={setTier} width={220} />
-      ) : (
-        spec.resolution && <PopoverSelect label="Quality" value={form.resolution} options={qualityOptions} onChange={(r) => set("resolution", r)} width={220} />
+      {/* Seedance shows resolution as a chip; Genjutsu and Kling tiers get a Quality row, like Higgsfield */}
+      {spec.model === "kling" && <PopoverSelect label="Quality" value={tier} options={KLING_TIER_OPTIONS} onChange={setTier} width={220} />}
+      {spec.model === "genjutsu" && (
+        <PopoverSelect label="Quality" value={form.resolution} options={qualityOptions} onChange={(r) => set("resolution", r)} width={220} />
       )}
 
-      {(duration !== null || spec.aspectRatios) && (
+      {(duration !== null || spec.aspectRatios || spec.model === "seedance") && (
         <div className="flex gap-2">
           {duration !== null && (
-            <Chip icon={<Clock size={14} />} title="Duration">
-              <select value={duration} onChange={(e) => set("duration", Number(e.target.value))} className={chipSelect}>
-                {Array.from({ length: spec.duration!.max - spec.duration!.min + 1 }, (_, i) => spec.duration!.min + i).map((s) => (
-                  <option key={s} value={s} className="bg-neutral-900">
-                    {s}s
-                  </option>
-                ))}
-              </select>
-            </Chip>
+            <DurationPicker value={duration} min={spec.duration!.min} max={spec.duration!.max} onChange={(s) => set("duration", s)} icon={<Clock size={14} />} />
           )}
-          {spec.aspectRatios && (
-            <Chip icon={<RectangleHorizontal size={14} />} title="Aspect ratio">
-              <select value={aspect} onChange={(e) => set("aspect_ratio", e.target.value)} className={chipSelect}>
-                {spec.aspectRatios.map((r) => (
-                  <option key={r} className="bg-neutral-900">
-                    {r}
-                  </option>
-                ))}
-              </select>
-            </Chip>
+          {spec.aspectRatios && aspect && (
+            <PopoverSelect
+              variant="chip"
+              label="Aspect ratio"
+              icon={<RectangleHorizontal size={14} />}
+              value={aspect}
+              options={spec.aspectRatios.map((r) => ({ value: r, label: r, icon: <RatioIcon ratio={r} /> }))}
+              onChange={(r) => set("aspect_ratio", r)}
+              width={200}
+            />
+          )}
+          {spec.model === "seedance" && (
+            <PopoverSelect
+              variant="chip"
+              label="Resolution"
+              icon={<Gem size={14} />}
+              value={form.resolution}
+              options={qualityOptions}
+              onChange={(r) => set("resolution", r)}
+              width={200}
+            />
           )}
         </div>
       )}
 
       {spec.bitrate && (
-        <label className={rowClass}>
-          <span className="flex items-center gap-2">
-            <Gauge size={16} className="text-neutral-400" /> Bitrate
-          </span>
-          <select value={form.bitrate_mode} onChange={(e) => set("bitrate_mode", e.target.value)} className="cursor-pointer appearance-none bg-transparent text-right font-semibold capitalize text-lime-300 outline-none">
-            {BITRATE_MODES.map((b) => (
-              <option key={b} value={b} className="bg-neutral-900 capitalize">
-                {b}
-              </option>
-            ))}
-          </select>
-        </label>
+        <PopoverSelect
+          variant="inline"
+          label="Bitrate"
+          icon={<Gauge size={16} />}
+          value={form.bitrate_mode}
+          options={BITRATE_OPTIONS}
+          onChange={(b) => set("bitrate_mode", b)}
+          width={320}
+        />
       )}
       {spec.cfgScale && (
         <label className={rowClass} title="How closely Kling follows the prompt (higher = stricter)">

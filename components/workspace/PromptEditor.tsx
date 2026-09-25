@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { MediaThumb } from "./MediaThumb";
 import { splitByTags, type RefItem } from "@/lib/tags";
 
@@ -27,12 +27,26 @@ const TEXT_LAYOUT = "whitespace-pre-wrap break-words px-3 py-2 text-sm leading-6
 /** "@Video1" -> "Video 1" */
 const menuLabel = (tag: string) => tag.slice(1).replace(/(\d+)$/, " $1");
 
+const LINE_HEIGHT = 24; // leading-6
+const MENU_WIDTH = 256; // w-64
+
 export function PromptEditor({ value, onChange, tags, insertRequest, placeholder, footer }: Props) {
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const mirrorRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<HTMLSpanElement>(null);
   const caret = useRef(value.length);
   const [menu, setMenu] = useState<{ query: string; start: number } | null>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 12 });
   const [active, setActive] = useState(0);
+
+  // place the @ menu right under the line where the "@" was typed, like Higgsfield
+  useLayoutEffect(() => {
+    const marker = markerRef.current;
+    const area = areaRef.current;
+    if (!menu || !marker || !area) return;
+    const left = Math.max(8, Math.min(marker.offsetLeft, area.clientWidth - MENU_WIDTH - 8));
+    setMenuPos({ top: marker.offsetTop - area.scrollTop + LINE_HEIGHT + 4, left });
+  }, [menu, value]);
   const known = new Set(tags.map((t) => t.tag));
   const suggestions = menu ? tags.filter((t) => t.tag.slice(1).toLowerCase().startsWith(menu.query)) : [];
 
@@ -91,6 +105,13 @@ export function PromptEditor({ value, onChange, tags, insertRequest, placeholder
           )}
           {"\n"}
         </div>
+        {menu && (
+          // invisible copy of the text up to the "@", used only to measure where the menu goes
+          <div aria-hidden className={`pointer-events-none invisible absolute inset-0 overflow-hidden ${TEXT_LAYOUT}`}>
+            {value.slice(0, menu.start)}
+            <span ref={markerRef}>@</span>
+          </div>
+        )}
         <textarea
           ref={areaRef}
           value={value}
@@ -124,7 +145,8 @@ export function PromptEditor({ value, onChange, tags, insertRequest, placeholder
         {menu && suggestions.length > 0 && (
           <ul
             role="listbox"
-            className="absolute left-2 top-full z-30 mt-1 max-h-72 w-64 overflow-y-auto rounded-2xl border border-white/10 bg-[#1c1c1f] p-1.5 shadow-2xl"
+            style={{ top: menuPos.top, left: menuPos.left }}
+            className="absolute z-30 max-h-72 w-64 overflow-y-auto rounded-2xl border border-white/10 bg-[#1c1c1f] p-1.5 shadow-2xl"
           >
             {suggestions.map((s, i) => (
               <li key={s.tag} role="option" aria-selected={i === active}>

@@ -13,10 +13,11 @@ import { parseTrimRange, trimVideo, type TrimRange } from "@/lib/trim";
 
 /** Cuts the video on disk with ffmpeg, then uploads the trimmed mp4. */
 async function uploadTrimmed(file: File, range: TrimRange): Promise<string> {
-  const dir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "seedance-trim-"));
+  // temp paths are runtime-only, keep them out of Turbopack's file tracing
+  const dir = await fs.promises.mkdtemp(path.join(/* turbopackIgnore: true */ os.tmpdir(), "seedance-trim-"));
   try {
-    const input = path.join(dir, `${randomUUID()}${path.extname(file.name) || ".mp4"}`);
-    const output = path.join(dir, "trimmed.mp4");
+    const input = path.join(/* turbopackIgnore: true */ dir, `${randomUUID()}${path.extname(file.name) || ".mp4"}`);
+    const output = path.join(/* turbopackIgnore: true */ dir, "trimmed.mp4");
     await pipeline(Readable.fromWeb(file.stream() as NodeReadableStream), fs.createWriteStream(input));
     await trimVideo(input, output, range);
     return await getHiggsfield().uploadFile(await fs.openAsBlob(output, { type: "video/mp4" }), "video/mp4");
