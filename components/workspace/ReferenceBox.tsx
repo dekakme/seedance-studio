@@ -2,7 +2,9 @@
 
 import { Loader2, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { Lightbox, lightboxButton, type PreviewItem } from "./Lightbox";
 import { MediaThumb } from "./MediaThumb";
+import { useTrimmer } from "./TrimDialog";
 import type { MediaKind } from "@/lib/modes";
 import { refTags, type RefItem } from "@/lib/tags";
 import { acceptFor, kindOf, uploadMedia } from "@/lib/upload-client";
@@ -23,8 +25,11 @@ interface Props {
 export function ReferenceBox({ title, refs, limits, onAdd, onRemove, onTag, onBusyChange, onDuration }: Props) {
   const [pending, setPending] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<(PreviewItem & { index: number }) | null>(null);
+  const [trimDialog, trim] = useTrimmer();
   const kinds = Object.keys(limits) as MediaKind[];
   const count = (kind: MediaKind) => refs.filter((r) => r.kind === kind).length;
+  const tagged = refTags(refs);
 
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -44,11 +49,14 @@ export function ReferenceBox({ title, refs, limits, onAdd, onRemove, onTag, onBu
       added[kind] = (added[kind] ?? 0) + 1;
       queue.push({ file, kind });
     }
-    setPending((n) => n + queue.length);
-    onBusyChange(queue.length);
     for (const { file, kind } of queue) {
+      // videos go through the trim dialog first; cancelling skips that file
+      const choice = kind === "video" ? await trim(file) : "full";
+      if (!choice) continue;
+      setPending((n) => n + 1);
+      onBusyChange(1);
       try {
-        onAdd({ kind, url: await uploadMedia(file) });
+        onAdd({ kind, url: await uploadMedia(file, choice === "full" ? undefined : choice) });
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -78,13 +86,23 @@ export function ReferenceBox({ title, refs, limits, onAdd, onRemove, onTag, onBu
             }}
           />
         </label>
-        {refTags(refs).map((ref, i) => (
+        {tagged.map((ref, i) => (
           <div key={`${ref.url}-${i}`} className="group relative aspect-square">
-            <button type="button" onClick={() => onTag(ref.tag)} className="h-full w-full" title={`Insert ${ref.tag} into the prompt`}>
+            <button
+              type="button"
+              onClick={() => setPreview({ kind: ref.kind, url: ref.url, label: ref.tag, index: i })}
+              className="h-full w-full"
+              title="Preview"
+            >
               <MediaThumb kind={ref.kind} url={ref.url} className="h-full w-full" onDuration={onDuration} />
-              <span className="absolute bottom-0.5 left-0.5 rounded bg-black/75 px-1 text-[10px] font-medium text-lime-300">
-                {ref.tag.slice(1)}
-              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onTag(ref.tag)}
+              className="absolute bottom-0.5 left-0.5 rounded bg-black/75 px-1 text-[10px] font-medium text-lime-300 hover:bg-lime-300 hover:text-black"
+              title={`Insert ${ref.tag} into the prompt`}
+            >
+              {ref.tag.slice(1)}
             </button>
             <button
               type="button"
@@ -104,9 +122,41 @@ export function ReferenceBox({ title, refs, limits, onAdd, onRemove, onTag, onBu
       </div>
       <p className="mt-2 text-[11px] text-neutral-500">
         {kinds.map((k) => `${KIND_LABEL[k]} ${count(k)}/${limits[k]}`).join(" · ")}
-        {refs.length > 0 && " — click a reference to tag it in the prompt"}
+        {refs.length > 0 && " — click to preview, click the label to tag it"}
       </p>
       {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+
+      <Lightbox
+        item={preview}
+        onClose={() => setPreview(null)}
+        actions={
+          preview && (
+            <>
+              <button
+                type="button"
+                className={lightboxButton}
+                onClick={() => {
+                  onTag(preview.label!);
+                  setPreview(null);
+                }}
+              >
+                Insert {preview.label} into prompt
+              </button>
+              <button
+                type="button"
+                className={`${lightboxButton} text-red-300`}
+                onClick={() => {
+                  onRemove(preview.index);
+                  setPreview(null);
+                }}
+              >
+                Remove
+              </button>
+            </>
+          )
+        }
+      />
+      {trimDialog}
     </div>
   );
 }

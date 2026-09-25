@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { Lightbox, type PreviewItem } from "./Lightbox";
 import { MediaThumb } from "./MediaThumb";
 import { useElapsed, useJob } from "./useJob";
 import { estimateJobCost, formatUsd } from "@/lib/cost";
@@ -93,6 +94,7 @@ export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDelete
   const [job, setJob] = useJob(initial);
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const [preview, setPreview] = useState<PreviewItem | null>(null);
   const running = !isTerminal(job.status);
   const elapsed = useElapsed(job.created_at, running);
 
@@ -232,10 +234,10 @@ export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDelete
         {refs.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {refs.map((r, i) => (
-              <div key={`${r.url}-${i}`} className="relative" title={r.label}>
+              <button key={`${r.url}-${i}`} type="button" onClick={() => setPreview(r)} className="relative" title={`Preview ${r.label}`}>
                 <MediaThumb kind={r.kind} url={r.url} className="h-11 w-11" />
                 <span className="absolute bottom-0 left-0 rounded bg-black/75 px-0.5 text-[9px] text-lime-300">{r.label}</span>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -280,6 +282,7 @@ export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDelete
           </div>
         </div>
       </aside>
+      <Lightbox item={preview} onClose={() => setPreview(null)} />
     </article>
   );
 }
