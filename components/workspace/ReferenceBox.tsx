@@ -10,6 +10,7 @@ import { acceptFor, kindOf, uploadMedia } from "@/lib/upload-client";
 const KIND_LABEL: Record<MediaKind, string> = { image: "Images", video: "Videos", audio: "Audio" };
 
 interface Props {
+  title?: string;
   refs: RefItem[];
   limits: Partial<Record<MediaKind, number>>;
   onAdd: (item: RefItem) => void;
@@ -19,7 +20,7 @@ interface Props {
   onDuration: (url: string, seconds: number) => void;
 }
 
-export function ReferenceBox({ refs, limits, onAdd, onRemove, onTag, onBusyChange, onDuration }: Props) {
+export function ReferenceBox({ title, refs, limits, onAdd, onRemove, onTag, onBusyChange, onDuration }: Props) {
   const [pending, setPending] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const kinds = Object.keys(limits) as MediaKind[];
@@ -59,6 +60,7 @@ export function ReferenceBox({ refs, limits, onAdd, onRemove, onTag, onBusyChang
 
   return (
     <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
+      {title && <div className="mb-2 text-xs text-neutral-400">{title}</div>}
       <div className="grid grid-cols-5 gap-2">
         <label
           className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/15 text-neutral-400 hover:border-white/40 hover:text-white"

@@ -2,9 +2,9 @@
 
 import { History, LayoutGrid, List } from "lucide-react";
 import { useState } from "react";
-import { Composer, type ComposerPreset } from "./Composer";
+import { Composer } from "./Composer";
 import { FeedItem } from "./FeedItem";
-import { DEFAULT_FORM, formFromJob } from "@/lib/studio-input";
+import { DEFAULT_FORM, formFromJob, type ComposerPreset } from "@/lib/studio-input";
 import type { Job } from "@/lib/types";
 
 type View = "list" | "grid";
@@ -65,7 +65,13 @@ export function Workspace({ initialJobs }: { initialJobs: Job[] }) {
                 onOpen={onOpen}
                 onReuse={(j) => load(formFromJob(j))}
                 onExtend={(j) =>
-                  load({ tab: "create", sub: "extend", form: { ...DEFAULT_FORM, media: { video_url: j.remote_url ?? undefined } } })
+                  load({
+                    tab: "create",
+                    sub: "extend",
+                    model: "seedance",
+                    tier: "std",
+                    form: { ...DEFAULT_FORM, media: { video_url: j.remote_url ?? undefined } },
+                  })
                 }
               />
             ))}

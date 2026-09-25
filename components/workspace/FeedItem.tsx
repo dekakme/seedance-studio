@@ -16,7 +16,7 @@ import { useState, type ReactNode } from "react";
 import { MediaThumb } from "./MediaThumb";
 import { useElapsed, useJob } from "./useJob";
 import { estimateJobCost, formatUsd } from "@/lib/cost";
-import { MODE_SPECS, type MediaKind } from "@/lib/modes";
+import { MODEL_LABEL, MODE_SPECS, type MediaKind } from "@/lib/modes";
 import { splitByTags } from "@/lib/tags";
 import { isTerminal, type Job, type JobStatus } from "@/lib/types";
 
@@ -49,7 +49,7 @@ const strs = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => ty
 function paramRefs(p: Record<string, unknown>): { kind: MediaKind; url: string; label: string }[] {
   const out: { kind: MediaKind; url: string; label: string }[] = [];
   const start = str(p.image_url);
-  const end = str(p.end_image_url);
+  const end = str(p.end_image_url) ?? str(p.last_image_url);
   const source = str(p.video_url);
   if (start) out.push({ kind: "image", url: start, label: "Start" });
   if (end) out.push({ kind: "image", url: end, label: "End" });
@@ -180,9 +180,15 @@ export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDelete
     );
   }
 
+  const spec = MODE_SPECS[job.mode];
   const refs = paramRefs(p);
-  const duration = typeof p.duration === "number" ? `${p.duration}s` : "Auto length";
-  const chips = [str(p.resolution) ?? "720p", duration, str(p.aspect_ratio) ?? "Auto frame", p.generate_audio === false ? "No audio" : "Audio"];
+  const chips = [
+    str(p.resolution),
+    typeof p.duration === "number" ? `${p.duration}s` : "Auto length",
+    str(p.aspect_ratio) ?? "Auto frame",
+    spec.audio ? (p.generate_audio === false || p.sound === "off" ? "No audio" : "Audio") : undefined,
+    typeof p.cfg_scale === "number" ? `CFG ${p.cfg_scale}` : undefined,
+  ].filter((c): c is string => !!c);
 
   return (
     <article id={`job-${job.id}`} className="grid scroll-mt-16 gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -208,13 +214,13 @@ export function FeedItem({ initial, view, onCreated, onReuse, onExtend, onDelete
       <aside className="flex flex-col gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-4">
         <div className="flex items-center justify-between gap-2">
           <span className="flex items-center gap-1.5 rounded-lg bg-white/5 px-2 py-1 text-xs font-semibold">
-            <BarChart3 size={12} className="text-lime-300" /> Seedance 2.5
+            <BarChart3 size={12} className="text-lime-300" /> {MODEL_LABEL[spec.model]}
           </span>
           <StatusPill status={job.status} />
         </div>
         {/* the browser's time zone can differ from the server's, so let the client render its own time */}
         <div className="text-[11px] uppercase tracking-wide text-neutral-500" suppressHydrationWarning>
-          {MODE_SPECS[job.mode].label} · {DATE_FORMAT.format(new Date(job.created_at))}
+          {spec.label} · {DATE_FORMAT.format(new Date(job.created_at))}
         </div>
         {prompt ? (
           <p className="max-h-48 overflow-y-auto whitespace-pre-wrap text-sm leading-6 text-neutral-300">

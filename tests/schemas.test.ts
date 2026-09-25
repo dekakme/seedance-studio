@@ -84,3 +84,40 @@ describe("parseJobInput", () => {
     expect(r.ok && r.payload.duration).toBe(8);
   });
 });
+
+describe("Kling 3.0", () => {
+  it("applies text-to-video defaults", () => {
+    expect(parseJobInput("kling_std_text", { prompt: "x" })).toEqual({
+      ok: true,
+      payload: { prompt: "x", sound: "on", cfg_scale: 0.5, duration: 5, aspect_ratio: "16:9" },
+    });
+  });
+
+  it("enforces Kling's own duration and aspect ratio limits", () => {
+    expect(errorPaths(parseJobInput("kling_pro_text", { prompt: "x", duration: 16 }))).toContain("duration");
+    expect(errorPaths(parseJobInput("kling_pro_text", { prompt: "x", aspect_ratio: "4:3" }))).toContain("aspect_ratio");
+    expect(parseJobInput("kling_pro_text", { prompt: "x", duration: 3, aspect_ratio: "1:1" }).ok).toBe(true);
+  });
+
+  it("image-to-video needs a start image and accepts a last image", () => {
+    expect(errorPaths(parseJobInput("kling_std_image", {}))).toContain("image_url");
+    const r = parseJobInput("kling_std_image", { image_url: img, last_image_url: `${img}?end` });
+    expect(r.ok && r.payload).toMatchObject({ image_url: img, last_image_url: `${img}?end` });
+    expect(r.ok && r.payload).not.toHaveProperty("aspect_ratio");
+  });
+});
+
+describe("Genjutsu motion transfer", () => {
+  it("needs a video and 1-8 images", () => {
+    expect(errorPaths(parseJobInput("genjutsu", { image_urls: [img] }))).toContain("video_url");
+    expect(errorPaths(parseJobInput("genjutsu", { video_url: vid }))).toContain("image_urls");
+    expect(errorPaths(parseJobInput("genjutsu", { video_url: vid, image_urls: many(img, 9) }))).toContain("image_urls");
+  });
+
+  it("defaults to 720p and has no duration or audio", () => {
+    expect(parseJobInput("genjutsu", { video_url: vid, image_urls: [img] })).toEqual({
+      ok: true,
+      payload: { video_url: vid, image_urls: [img], resolution: "720p" },
+    });
+  });
+});

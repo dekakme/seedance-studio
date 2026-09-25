@@ -1,8 +1,11 @@
 # Seedance Studio
 
-Private web app for generating ByteDance **Seedance 2.5** videos through the
-[Higgsfield API](https://docs.higgsfield.ai): text → video, image → video,
-reference → video, video edit and video extend.
+Private web app for generating videos through the [Higgsfield API](https://docs.higgsfield.ai):
+
+- **Seedance 2.5**: text, image (start/end frame), references with `@Image1`/`@Video1`/`@Audio1`
+  prompt tags, video edit and video extend
+- **Kling 3.0**: Standard, Pro and 4K tiers, text → video and image → video
+- **Genjutsu Motion Transfer** (Motion Control tab): restyle a video with 1–8 character/style images
 
 ## Setup
 
@@ -36,9 +39,13 @@ Credentials stay on the server: the browser only talks to this app's `/api/*` ro
 
 ## Costs
 
-Every generation is billed by Higgsfield. Seedance 2.5 at 480p/720p costs about
-$0.0214 per 1,000 video tokens. That is roughly $0.82 for 4 s at 480p and $2.31
-for 5 s at 720p (16:9).
+Every generation is billed by Higgsfield. The composer shows an estimate before you generate:
+
+- Seedance 2.5: $0.0214 per 1,000 video tokens (input + output video). Roughly $0.82 for 4 s at 480p and
+  $2.31 for 5 s at 720p (16:9)
+- Kling 3.0: per output second. Standard $0.0462, Pro $0.0616, 4K $0.231. These are the console's
+  promotional prices; list prices are $0.084 / $0.112 / $0.42
+- Genjutsu: per started second of input video. $0.318 at 480p, $0.681 at 720p
 
 ## Data
 

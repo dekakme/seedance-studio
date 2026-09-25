@@ -49,6 +49,24 @@ describe("estimateForForm", () => {
   });
 });
 
+describe("other models", () => {
+  it("prices Genjutsu per started second of input video", () => {
+    const form = { ...DEFAULT_FORM, resolution: "720p", media: { video_url: vid } };
+    expect(estimateForForm("genjutsu", form, {})).toBeNull();
+    // 5.2s rounds up to 6s × $0.681
+    expect(estimateForForm("genjutsu", form, { [vid]: 5.2 })?.usd).toBeCloseTo(4.086, 3);
+    expect(estimateForForm("genjutsu", { ...form, resolution: "480p" }, { [vid]: 5.2 })?.usd).toBeCloseTo(1.908, 3);
+  });
+
+  it("prices Kling per second of output by tier", () => {
+    expect(estimateForForm("kling_std_text", { ...DEFAULT_FORM, prompt: "x", duration: 5 }, {})?.usd).toBeCloseTo(0.231, 4);
+    expect(estimateForForm("kling_4k_image", { ...DEFAULT_FORM, duration: 10 }, {})?.usd).toBeCloseTo(2.31, 4);
+    // duration is clamped to Kling's 15s max, like the payload
+    expect(estimateForForm("kling_pro_text", { ...DEFAULT_FORM, prompt: "x", duration: 30 }, {})?.usd).toBeCloseTo(0.924, 4);
+    expect(estimateJobCost({ mode: "kling_pro_text", params: { duration: 5 } })).toEqual({ usd: 0.308, partial: false });
+  });
+});
+
 describe("estimateJobCost", () => {
   it("estimates text jobs from their params", () => {
     expect(estimateJobCost({ mode: "text", params: { duration: 4, resolution: "480p", aspect_ratio: "16:9" } })).toMatchObject({

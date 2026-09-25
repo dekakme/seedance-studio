@@ -6,12 +6,20 @@ const vid = "https://cdn.example.com/v.mp4";
 const aud = "https://cdn.example.com/a.mp3";
 
 describe("resolveMode", () => {
-  it("maps tabs to Seedance endpoints", () => {
+  it("maps Seedance tabs to endpoints", () => {
     expect(resolveMode("create", "references", [])).toBe("text");
     expect(resolveMode("create", "references", [{ kind: "image", url: img }])).toBe("reference");
     expect(resolveMode("create", "frames", [])).toBe("image");
     expect(resolveMode("create", "extend", [])).toBe("extend");
     expect(resolveMode("edit", "references", [])).toBe("edit");
+  });
+
+  it("maps Kling and Motion Control", () => {
+    expect(resolveMode("create", "references", [], "kling", "std")).toBe("kling_std_text");
+    expect(resolveMode("create", "frames", [], "kling", "pro")).toBe("kling_pro_image");
+    expect(resolveMode("create", "extend", [], "kling", "std")).toBe("kling_std_text");
+    expect(resolveMode("create", "frames", [], "kling", "4k")).toBe("kling_4k_image");
+    expect(resolveMode("motion", "references", [])).toBe("genjutsu");
   });
 });
 
@@ -20,6 +28,8 @@ describe("refLimits", () => {
     expect(refLimits("text")).toEqual({ image: 30, video: 10, audio: 10 });
     expect(refLimits("edit")).toEqual({ image: 30, video: 9, audio: 10 });
     expect(refLimits("image")).toEqual({});
+    expect(refLimits("genjutsu")).toEqual({ image: 8 });
+    expect(refLimits("kling_std_text")).toEqual({});
   });
 });
 
@@ -56,6 +66,16 @@ describe("buildInput", () => {
     expect(input.audio_urls).toEqual([aud]);
     expect(input).not.toHaveProperty("video_urls");
   });
+
+  it("speaks Kling's fields and clamps values to its limits", () => {
+    const form = { ...DEFAULT_FORM, prompt: "x", duration: 30, aspect_ratio: "21:9", generate_audio: false, cfg_scale: 0.7 };
+    expect(buildInput("kling_pro_text", form)).toEqual({ prompt: "x", sound: "off", cfg_scale: 0.7, duration: 15, aspect_ratio: "16:9" });
+  });
+
+  it("builds a Genjutsu payload from the source video and images", () => {
+    const form = { ...DEFAULT_FORM, media: { video_url: vid }, refs: [{ kind: "image" as const, url: img }] };
+    expect(buildInput("genjutsu", form)).toEqual({ video_url: vid, image_urls: [img], resolution: "720p" });
+  });
 });
 
 describe("formFromJob", () => {
@@ -70,8 +90,15 @@ describe("formFromJob", () => {
       image_urls: [img],
       video_urls: [vid],
     };
-    const { tab, sub, form } = formFromJob({ mode: "reference", params });
-    expect([tab, sub]).toEqual(["create", "references"]);
-    expect(buildInput("reference", form)).toEqual(params);
+    const preset = formFromJob({ mode: "reference", params });
+    expect([preset.tab, preset.sub, preset.model]).toEqual(["create", "references", "seedance"]);
+    expect(buildInput("reference", preset.form)).toEqual(params);
+  });
+
+  it("restores Kling tier and Motion Control", () => {
+    const kling = formFromJob({ mode: "kling_pro_image", params: { image_url: img, sound: "off", duration: 7, cfg_scale: 0.3 } });
+    expect([kling.tab, kling.sub, kling.model, kling.tier]).toEqual(["create", "frames", "kling", "pro"]);
+    expect(buildInput("kling_pro_image", kling.form)).toEqual({ image_url: img, sound: "off", duration: 7, cfg_scale: 0.3 });
+    expect(formFromJob({ mode: "genjutsu", params: { video_url: vid, image_urls: [img] } }).tab).toBe("motion");
   });
 });

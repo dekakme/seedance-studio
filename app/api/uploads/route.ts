@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     const url = await getHiggsfield().uploadFile(file, file.type);
     return NextResponse.json({ url });
   } catch (err) {
+    console.warn(`[uploads] ${file.name} (${file.type}, ${file.size} bytes) failed:`, err);
     const { httpStatus, message } = describeError(err);
     return NextResponse.json({ error: message }, { status: httpStatus });
   }
