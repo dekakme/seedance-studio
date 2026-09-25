@@ -32,12 +32,21 @@ function buildSchema(mode: Mode) {
     shape[field] = limits.min ? list.min(limits.min, `Add at least ${limits.min}`) : list.default([]);
   }
 
-  const schema = z.strictObject(shape);
-  if (mode !== "reference") return schema;
-  return schema.refine(
-    (v) => ["image_urls", "video_urls", "audio_urls"].some((k) => (v[k] as unknown[]).length > 0),
-    { message: "Add at least one reference image, video or audio" },
-  );
+  let schema = z.strictObject(shape);
+  const count = (v: Record<string, unknown>, k: string) => (Array.isArray(v[k]) ? (v[k] as unknown[]).length : 0);
+  if (spec.refRule) {
+    const kinds = spec.refRule === "any" ? ["image_urls", "video_urls", "audio_urls"] : ["image_urls", "video_urls"];
+    schema = schema.refine((v) => kinds.some((k) => count(v, k) > 0), {
+      message: spec.refRule === "any" ? "Add at least one reference image, video or audio" : "Add at least one reference image or video",
+    });
+  }
+  if (spec.maxTotalRefs) {
+    const max = spec.maxTotalRefs;
+    schema = schema.refine((v) => count(v, "image_urls") + count(v, "video_urls") + count(v, "audio_urls") <= max, {
+      message: `At most ${max} references in total`,
+    });
+  }
+  return schema;
 }
 
 const SCHEMAS = {} as Record<Mode, z.ZodType>;

@@ -67,6 +67,21 @@ describe("other models", () => {
   });
 });
 
+describe("MiniMax", () => {
+  it("prices $0.13 per generated second", () => {
+    expect(estimateForForm("minimax_text", { ...DEFAULT_FORM, prompt: "x", duration: 10 }, {})?.usd).toBeCloseTo(1.3, 4);
+    // duration is clamped to MiniMax's 5-15s like the payload
+    expect(estimateForForm("minimax_image", { ...DEFAULT_FORM, duration: 30 }, {})?.usd).toBeCloseTo(1.95, 4);
+    expect(estimateJobCost({ mode: "minimax_text", params: { duration: 5 } })).toEqual({ usd: 0.65, partial: false });
+  });
+
+  it("adds $0.08 per reference image beyond the first five", () => {
+    const refs = Array.from({ length: 7 }, (_, i) => ({ kind: "image" as const, url: `https://cdn.example.com/${i}.png` }));
+    expect(estimateForForm("minimax_reference", { ...DEFAULT_FORM, prompt: "x", duration: 5, refs }, {})?.usd).toBeCloseTo(0.81, 4);
+    expect(estimateJobCost({ mode: "minimax_reference", params: { duration: 5, image_urls: refs.map((r) => r.url) } })?.usd).toBeCloseTo(0.81, 4);
+  });
+});
+
 describe("estimateJobCost", () => {
   it("estimates text jobs from their params", () => {
     expect(estimateJobCost({ mode: "text", params: { duration: 4, resolution: "480p", aspect_ratio: "16:9" } })).toMatchObject({

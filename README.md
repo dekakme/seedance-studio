@@ -5,6 +5,8 @@ Private web app for generating videos through the [Higgsfield API](https://docs.
 - **Seedance 2.5**: text, image (start/end frame), references with `@Image1`/`@Video1`/`@Audio1`
   prompt tags, video edit and video extend
 - **Kling 3.0**: Standard, Pro and 4K tiers, text → video and image → video
+- **MiniMax H3** (2K): text → video, image → video (first/last frame), and references (up to 9 images,
+  3 videos and 3 audio, 12 total) with prompt tags
 - **Higgsfield Genjutsu**: Motion Transfer (new character/style on an existing video's motion) and
   Object Swap (replace objects in a video), each with 1–8 reference images
 
@@ -50,6 +52,8 @@ Every generation is billed by Higgsfield. The composer shows an estimate before 
   $2.31 for 5 s at 720p (16:9)
 - Kling 3.0: per output second. Standard $0.0462, Pro $0.0616, 4K $0.231. These are the console's
   promotional prices; list prices are $0.084 / $0.112 / $0.42
+- MiniMax H3: $0.13 per generated second. The first 5 reference images are included; each extra image
+  costs $0.08. These prices come from the reference-to-video docs and are applied to all H3 modes
 - Genjutsu: per started second of input video. The promo price is $0.159 at 480p (720p assumed at the same
   50% off, $0.3405); list prices are $0.318 / $0.681
 

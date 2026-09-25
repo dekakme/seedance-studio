@@ -21,6 +21,9 @@ describe("resolveMode", () => {
     expect(resolveMode("create", "frames", [], "kling", "4k")).toBe("kling_4k_image");
     expect(resolveMode("create", "motion", [], "genjutsu")).toBe("genjutsu");
     expect(resolveMode("create", "swap", [], "genjutsu")).toBe("genjutsu_swap");
+    expect(resolveMode("create", "references", [], "minimax")).toBe("minimax_text");
+    expect(resolveMode("create", "references", [{ kind: "video", url: vid }], "minimax")).toBe("minimax_reference");
+    expect(resolveMode("create", "frames", [], "minimax")).toBe("minimax_image");
     // a sub-tab from another model falls back to motion transfer
     expect(resolveMode("create", "references", [], "genjutsu")).toBe("genjutsu");
   });
@@ -33,6 +36,7 @@ describe("refLimits", () => {
     expect(refLimits("image")).toEqual({});
     expect(refLimits("genjutsu")).toEqual({ image: 8 });
     expect(refLimits("genjutsu_swap")).toEqual({ image: 8 });
+    expect(refLimits("minimax_text")).toEqual({ image: 9, video: 3, audio: 3 });
     expect(refLimits("kling_std_text")).toEqual({});
   });
 });
@@ -106,5 +110,7 @@ describe("formFromJob", () => {
     const swap = formFromJob({ mode: "genjutsu_swap", params: { video_url: vid, image_urls: [img] } });
     expect([swap.tab, swap.sub, swap.model]).toEqual(["create", "swap", "genjutsu"]);
     expect(formFromJob({ mode: "genjutsu", params: { video_url: vid, image_urls: [img] } }).sub).toBe("motion");
+    const minimax = formFromJob({ mode: "minimax_image", params: { prompt: "x", image_url: img } });
+    expect([minimax.model, minimax.sub]).toEqual(["minimax", "frames"]);
   });
 });

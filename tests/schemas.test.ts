@@ -107,6 +107,34 @@ describe("Kling 3.0", () => {
   });
 });
 
+describe("MiniMax H3", () => {
+  it("applies text-to-video defaults", () => {
+    expect(parseJobInput("minimax_text", { prompt: "x" })).toEqual({
+      ok: true,
+      payload: { prompt: "x", duration: 5, aspect_ratio: "auto" },
+    });
+  });
+
+  it("enforces 5-15s and its aspect ratios", () => {
+    expect(errorPaths(parseJobInput("minimax_text", { prompt: "x", duration: 4 }))).toContain("duration");
+    expect(parseJobInput("minimax_text", { prompt: "x", duration: 15, aspect_ratio: "adaptive" }).ok).toBe(true);
+  });
+
+  it("image-to-video needs a prompt and a first frame", () => {
+    expect(errorPaths(parseJobInput("minimax_image", { image_url: img }))).toContain("prompt");
+    expect(errorPaths(parseJobInput("minimax_image", { prompt: "x" }))).toContain("image_url");
+    expect(parseJobInput("minimax_image", { prompt: "x", image_url: img, end_image_url: `${img}?end` }).ok).toBe(true);
+  });
+
+  it("reference-to-video needs an image or video and caps references at 12", () => {
+    expect(parseJobInput("minimax_reference", { prompt: "x", audio_urls: [aud] }).ok).toBe(false);
+    expect(parseJobInput("minimax_reference", { prompt: "x", video_urls: [vid], audio_urls: [aud] }).ok).toBe(true);
+    expect(errorPaths(parseJobInput("minimax_reference", { prompt: "x", image_urls: many(img, 10) }))).toContain("image_urls");
+    const tooMany = { prompt: "x", image_urls: many(img, 9), video_urls: many(vid, 3), audio_urls: [aud] };
+    expect(parseJobInput("minimax_reference", tooMany).ok).toBe(false);
+  });
+});
+
 describe("Genjutsu motion transfer", () => {
   it("needs a video and 1-8 images", () => {
     expect(errorPaths(parseJobInput("genjutsu", { image_urls: [img] }))).toContain("video_url");

@@ -12,6 +12,9 @@ export const MODES = [
   "kling_4k_image",
   "genjutsu",
   "genjutsu_swap",
+  "minimax_text",
+  "minimax_image",
+  "minimax_reference",
 ] as const;
 export type Mode = (typeof MODES)[number];
 
@@ -19,11 +22,12 @@ export function isMode(value: unknown): value is Mode {
   return typeof value === "string" && (MODES as readonly string[]).includes(value);
 }
 
-export type ModelFamily = "seedance" | "kling" | "genjutsu";
+export type ModelFamily = "seedance" | "kling" | "genjutsu" | "minimax";
 export const MODEL_LABEL: Record<ModelFamily, string> = {
   seedance: "Seedance 2.5",
   kling: "Kling 3.0",
   genjutsu: "Higgsfield Genjutsu",
+  minimax: "MiniMax H3",
 };
 
 export const MODE_PATHS: Record<Mode, string> = {
@@ -40,10 +44,14 @@ export const MODE_PATHS: Record<Mode, string> = {
   kling_4k_image: "/kling-video/v3.0/4k/image-to-video",
   genjutsu: "/higgsfield/genjutsu/motion-transfer/v1.0",
   genjutsu_swap: "/higgsfield/genjutsu/object-swap/v1.0",
+  minimax_text: "/minimax/h3/text-to-video",
+  minimax_image: "/minimax/h3/image-to-video",
+  minimax_reference: "/minimax/h3/reference-to-video",
 };
 
 export const ASPECT_RATIOS = ["16:9", "4:3", "1:1", "3:4", "9:16", "21:9"] as const;
 export const KLING_ASPECT_RATIOS = ["16:9", "9:16", "1:1"] as const;
+export const MINIMAX_ASPECT_RATIOS = ["auto", "adaptive", "21:9", "16:9", "4:3", "1:1", "3:4", "9:16"] as const;
 export const RESOLUTIONS = ["480p", "720p"] as const;
 export const BITRATE_MODES = ["standard", "high"] as const;
 export const OUTPUT_FORMATS = ["mp4", "mov"] as const;
@@ -69,6 +77,10 @@ export interface ModeSpec {
   cfgScale: boolean;
   single: { field: SingleField; required: boolean }[];
   multi: Partial<Record<MultiField, { min?: number; max: number }>>;
+  /** reference modes: "any" needs one image, video or audio; "visual" needs an image or video */
+  refRule?: "any" | "visual";
+  /** cap on image + video + audio references combined */
+  maxTotalRefs?: number;
 }
 
 function seedance(label: string, extra: Partial<ModeSpec>): ModeSpec {
@@ -111,6 +123,25 @@ function kling(tier: "Std" | "Pro" | "4K", fromImage: boolean): ModeSpec {
   };
 }
 
+function minimax(label: string, extra: Partial<ModeSpec>): ModeSpec {
+  return {
+    model: "minimax",
+    label,
+    promptRequired: true,
+    duration: { min: 5, max: 15, default: 5 },
+    aspectRatios: MINIMAX_ASPECT_RATIOS,
+    // resolution only accepts "2K", which is also the default, so it is not sent
+    resolution: false,
+    bitrate: false,
+    outputFormat: false,
+    audio: null,
+    cfgScale: false,
+    single: [],
+    multi: {},
+    ...extra,
+  };
+}
+
 /** Motion Transfer and Object Swap share one input schema. */
 function genjutsu(label: string): ModeSpec {
   return {
@@ -145,6 +176,7 @@ export const MODE_SPECS: Record<Mode, ModeSpec> = {
   reference: seedance("Reference → Video", {
     aspectRatios: ASPECT_RATIOS,
     multi: { image_urls: { max: 30 }, video_urls: { max: 10 }, audio_urls: { max: 10 } },
+    refRule: "any",
   }),
   edit: seedance("Edit Video", { duration: null, single: [{ field: "video_url", required: true }], multi: SEEDANCE_EDIT_REFS }),
   extend: seedance("Extend Video", { single: [{ field: "video_url", required: true }], multi: SEEDANCE_EDIT_REFS }),
@@ -156,6 +188,18 @@ export const MODE_SPECS: Record<Mode, ModeSpec> = {
   kling_4k_image: kling("4K", true),
   genjutsu: genjutsu("Motion Transfer"),
   genjutsu_swap: genjutsu("Object Swap"),
+  minimax_text: minimax("Text → Video", {}),
+  minimax_image: minimax("Image → Video", {
+    single: [
+      { field: "image_url", required: true },
+      { field: "end_image_url", required: false },
+    ],
+  }),
+  minimax_reference: minimax("Reference → Video", {
+    multi: { image_urls: { max: 9 }, video_urls: { max: 3 }, audio_urls: { max: 3 } },
+    refRule: "visual",
+    maxTotalRefs: 12,
+  }),
 };
 
 export const UPLOAD_TYPES = {

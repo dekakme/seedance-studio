@@ -57,12 +57,17 @@ const SUBS: Record<CreateModel, { id: CreateSub; label: string }[]> = {
     { id: "motion", label: "Motion transfer" },
     { id: "swap", label: "Objects swap" },
   ],
+  minimax: [
+    { id: "references", label: "References" },
+    { id: "frames", label: "Frames" },
+  ],
 };
 
 const MODEL_OPTIONS: PopoverOption<CreateModel>[] = [
   { value: "seedance", label: "Seedance 2.5", badge: "TOP", meta: ["720p", "4s–30s", "Audio"] },
   { value: "kling", label: "Kling 3.0", meta: ["Std · Pro · 4K", "3s–15s", "Audio"] },
   { value: "genjutsu", label: "Higgsfield Genjutsu", badge: "NEW", meta: ["720p", "1s–30s", "Motion · Swap"] },
+  { value: "minimax", label: "MiniMax H3", meta: ["2K", "5s–15s", "$0.13/s"] },
 ];
 
 const KLING_TIER_OPTIONS: PopoverOption<KlingTier>[] = (["std", "pro", "4k"] as const).map((t) => ({
@@ -79,6 +84,14 @@ const BITRATE_OPTIONS: PopoverOption<string>[] = [
 /** Small outline box drawn at the given aspect ratio, for the aspect ratio list. */
 function RatioIcon({ ratio }: { ratio: string }) {
   const [w, h] = ratio.split(":").map(Number);
+  // "auto" / "adaptive" (MiniMax): no fixed shape
+  if (!w || !h) {
+    return (
+      <span className="flex h-4 w-4 items-center justify-center">
+        <span className="h-3.5 w-3.5 rounded-[2px] border-[1.5px] border-dashed border-current" />
+      </span>
+    );
+  }
   const scale = 16 / Math.max(w, h);
   return (
     <span className="flex h-4 w-4 items-center justify-center">

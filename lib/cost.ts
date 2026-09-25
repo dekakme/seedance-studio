@@ -12,15 +12,25 @@ import type { Job } from "./types";
 export const USD_PER_1K_TOKENS = 0.0214;
 export const GENJUTSU_USD_PER_SECOND: Record<string, number> = { "480p": 0.159, "720p": 0.3405 };
 export const KLING_USD_PER_SECOND: Record<string, number> = { std: 0.0462, pro: 0.0616, "4k": 0.231 };
+// MiniMax H3 (reference-to-video docs; applied to all H3 modes): $0.13 per generated 2K second,
+// first 5 reference images included, $0.08 per extra image
+export const MINIMAX_USD_PER_SECOND = 0.13;
+const MINIMAX_FREE_IMAGES = 5;
+const MINIMAX_USD_PER_EXTRA_IMAGE = 0.08;
 
 function klingRate(mode: Mode): number {
   const tier = mode.split("_")[1];
   return KLING_USD_PER_SECOND[tier] ?? KLING_USD_PER_SECOND.std;
 }
 
-function klingSeconds(mode: Mode, duration: number): number {
+/** The duration actually sent: clamped to the mode's range, like buildInput does. */
+function sentSeconds(mode: Mode, duration: number): number {
   const range = MODE_SPECS[mode].duration!;
   return Math.min(range.max, Math.max(range.min, duration));
+}
+
+function minimaxUsd(seconds: number, images: number): number {
+  return round4(seconds * MINIMAX_USD_PER_SECOND + Math.max(0, images - MINIMAX_FREE_IMAGES) * MINIMAX_USD_PER_EXTRA_IMAGE);
 }
 const FPS = 24;
 /** Seedance trims video inputs to a 30-second budget. */
@@ -65,8 +75,18 @@ export interface FormEstimate {
  */
 export function estimateForForm(mode: Mode, form: FormState, durations: Record<string, number>): FormEstimate | null {
   const spec = MODE_SPECS[mode];
+  if (spec.model === "minimax") {
+    const seconds = sentSeconds(mode, form.duration);
+    const images = "image_urls" in spec.multi ? form.refs.filter((r) => r.kind === "image").length : 0;
+    const extra = Math.max(0, images - MINIMAX_FREE_IMAGES);
+    return {
+      usd: minimaxUsd(seconds, images),
+      detail: `${seconds}s × $${MINIMAX_USD_PER_SECOND}/s${extra ? ` + ${extra} extra image${extra > 1 ? "s" : ""} × $${MINIMAX_USD_PER_EXTRA_IMAGE}` : ""}`,
+      notes: images > 0 && images <= MINIMAX_FREE_IMAGES ? [`First ${MINIMAX_FREE_IMAGES} reference images are included.`] : [],
+    };
+  }
   if (spec.model === "kling") {
-    const seconds = klingSeconds(mode, form.duration);
+    const seconds = sentSeconds(mode, form.duration);
     const rate = klingRate(mode);
     return {
       usd: round4(seconds * rate),
@@ -128,7 +148,11 @@ export function estimateJobCost(job: Pick<Job, "mode" | "params">): { usd: numbe
   const model = MODE_SPECS[job.mode].model;
   const p = job.params;
   if (model === "genjutsu" || typeof p.duration !== "number") return null;
-  if (model === "kling") return { usd: round4(klingSeconds(job.mode, p.duration) * klingRate(job.mode)), partial: false };
+  if (model === "kling") return { usd: round4(sentSeconds(job.mode, p.duration) * klingRate(job.mode)), partial: false };
+  if (model === "minimax") {
+    const images = Array.isArray(p.image_urls) ? p.image_urls.length : 0;
+    return { usd: minimaxUsd(sentSeconds(job.mode, p.duration), images), partial: false };
+  }
   const hasInputVideo = typeof p.video_url === "string" || (Array.isArray(p.video_urls) && p.video_urls.length > 0);
   const { usd } = estimateCost({
     resolution: typeof p.resolution === "string" ? p.resolution : "720p",

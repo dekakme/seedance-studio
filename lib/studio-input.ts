@@ -5,7 +5,7 @@ import type { Job } from "./types";
 export type Tab = "create" | "edit";
 export type CreateSub = "references" | "frames" | "extend" | "motion" | "swap";
 /** Models offered on the Create Video tab (Edit Video is Seedance edit). */
-export type CreateModel = "seedance" | "kling" | "genjutsu";
+export type CreateModel = "seedance" | "kling" | "genjutsu" | "minimax";
 export type KlingTier = "std" | "pro" | "4k";
 
 export interface FormState {
@@ -55,15 +55,19 @@ export const KIND_FIELD: Record<MediaKind, MultiField> = {
 export function resolveMode(tab: Tab, sub: CreateSub, refs: RefItem[], model: CreateModel = "seedance", tier: KlingTier = "std"): Mode {
   if (tab === "edit") return "edit";
   if (model === "genjutsu") return sub === "swap" ? "genjutsu_swap" : "genjutsu";
+  if (model === "minimax") return sub === "frames" ? "minimax_image" : refs.length > 0 ? "minimax_reference" : "minimax_text";
   if (model === "kling") return sub === "frames" ? `kling_${tier}_image` : `kling_${tier}_text`;
   if (sub === "frames") return "image";
   if (sub === "extend") return "extend";
   return refs.length > 0 ? "reference" : "text";
 }
 
-/** Max references per kind for a mode (text mode takes the reference limits, since adding one switches to it). */
+// text modes take their reference mode's limits, since adding a reference switches to it
+const REFERENCE_MODE_FOR: Partial<Record<Mode, Mode>> = { text: "reference", minimax_text: "minimax_reference" };
+
+/** Max references per kind for a mode. */
 export function refLimits(mode: Mode): Partial<Record<MediaKind, number>> {
-  const multi = MODE_SPECS[mode === "text" ? "reference" : mode].multi;
+  const multi = MODE_SPECS[REFERENCE_MODE_FOR[mode] ?? mode].multi;
   const limits: Partial<Record<MediaKind, number>> = {};
   for (const kind of Object.keys(KIND_FIELD) as MediaKind[]) {
     const entry = multi[KIND_FIELD[kind]];
