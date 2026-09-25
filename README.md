@@ -1,5 +1,7 @@
 # Seedance Studio
 
+📖 **Tutorial lengkap (Bahasa Indonesia): [docs/TUTORIAL.md](docs/TUTORIAL.md)**
+
 Private web app for generating videos through the [Higgsfield API](https://docs.higgsfield.ai):
 
 - **Seedance 2.5**: text, image (start/end frame), references with `@Image1`/`@Video1`/`@Audio1`
