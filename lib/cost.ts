@@ -48,8 +48,9 @@ export function estimateForForm(mode: Mode, form: FormState, durations: Record<s
   const spec = MODE_SPECS[mode];
   const notes: string[] = [];
 
-  const hasSource = spec.single.some((s) => s.field === "video_url");
-  const videoUrls = [...(hasSource ? (form.media.video_url ?? []) : []), ...("video_urls" in spec.multi ? (form.media.video_urls ?? []) : [])];
+  const source = spec.single.some((s) => s.field === "video_url") ? form.media.video_url : undefined;
+  const refVideos = "video_urls" in spec.multi ? form.refs.filter((r) => r.kind === "video").map((r) => r.url) : [];
+  const videoUrls = [...(source ? [source] : []), ...refVideos];
   let knownSeconds = 0;
   let unknown = false;
   for (const url of videoUrls) {
@@ -63,7 +64,6 @@ export function estimateForForm(mode: Mode, form: FormState, durations: Record<s
   if (spec.duration) {
     outputSeconds = form.duration;
   } else {
-    const source = form.media.video_url?.[0];
     const d = source ? durations[source] : undefined;
     if (!d) return null;
     outputSeconds = Math.min(MAX_INPUT_VIDEO_SECONDS, Math.max(4, d));

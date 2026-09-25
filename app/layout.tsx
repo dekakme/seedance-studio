@@ -22,24 +22,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <body className="min-h-screen bg-neutral-950 font-sans text-neutral-100">
-        <header className="border-b border-neutral-800">
-          <nav className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
-            <Link href="/" className="font-semibold">
-              Seedance Studio
-            </Link>
-            <Link href="/" className="text-sm text-neutral-400 hover:text-white">
-              Studio
-            </Link>
-            <Link href="/gallery" className="text-sm text-neutral-400 hover:text-white">
-              Gallery
-            </Link>
-            <div className="ml-auto">
-              <LogoutButton />
-            </div>
-          </nav>
+      <body className="min-h-screen bg-[#0b0b0c] font-sans text-neutral-100">
+        <header className="flex h-[49px] items-center gap-3 border-b border-white/5 px-4">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#d7ff3a]" /> Seedance Studio
+          </Link>
+          <div className="ml-auto">
+            <LogoutButton />
+          </div>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main>{children}</main>
       </body>
     </html>
   );

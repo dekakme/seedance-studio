@@ -33,14 +33,14 @@ describe("estimateForForm", () => {
   });
 
   it("adds the source video length and caps input video at 30s", () => {
-    const form = { ...DEFAULT_FORM, duration: 5, media: { video_url: [vid] } };
+    const form = { ...DEFAULT_FORM, duration: 5, media: { video_url: vid } };
     const e = estimateForForm("extend", form, { [vid]: 40 });
     const expected = estimateCost({ resolution: "720p", aspectRatio: "16:9", outputSeconds: 5, inputVideoSeconds: 30 });
     expect(e?.usd).toBe(expected.usd);
   });
 
   it("uses the source length as output for edit and flags unknown lengths", () => {
-    const form = { ...DEFAULT_FORM, media: { video_url: [vid] } };
+    const form = { ...DEFAULT_FORM, media: { video_url: vid } };
     expect(estimateForForm("edit", form, {})).toBeNull();
     const e = estimateForForm("edit", form, { [vid]: 6 });
     const expected = estimateCost({ resolution: "720p", aspectRatio: "16:9", outputSeconds: 6, inputVideoSeconds: 6 });

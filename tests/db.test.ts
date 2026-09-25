@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { findJobByClientToken, getJob, insertJob, listJobs, openDb, updateJob, type Db } from "@/lib/db";
+import { deleteJob, findJobByClientToken, getJob, insertJob, listJobs, openDb, updateJob, type Db } from "@/lib/db";
 
 let db: Db;
 beforeEach(() => {
@@ -45,6 +45,13 @@ describe("jobs repository", () => {
       created_at: "2026-01-01T00:00:00.000Z",
       updated_at: "2026-01-02T00:00:00.000Z",
     });
+  });
+
+  it("deletes a job", () => {
+    insertJob(db, { id: "a", mode: "text", params: {}, status: "queued" });
+    expect(deleteJob(db, "a")).toBe(true);
+    expect(getJob(db, "a")).toBeNull();
+    expect(deleteJob(db, "a")).toBe(false);
   });
 
   it("finds a job by client token and rejects duplicates", () => {

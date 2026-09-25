@@ -84,7 +84,11 @@ export function listJobs(db: Db, limit = 100): Job[] {
   return rows.map(toJob);
 }
 
-const PATCHABLE = ["request_id", "status_url", "cancel_url", "status", "error", "remote_url", "local_path"] as const;
+export function deleteJob(db: Db, id: string): boolean {
+  return db.prepare("DELETE FROM jobs WHERE id = ?").run(id).changes > 0;
+}
+
+const PATCHABLE =["request_id", "status_url", "cancel_url", "status", "error", "remote_url", "local_path"] as const;
 export type JobPatch = Partial<Pick<Job, (typeof PATCHABLE)[number]>>;
 
 export function updateJob(db: Db, id: string, patch: JobPatch, now = new Date()): Job | null {
