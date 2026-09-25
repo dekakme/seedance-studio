@@ -19,7 +19,9 @@ const httpsUrl = z.url({ protocol: /^https$/, message: "Must be an https URL" })
 function buildSchema(mode: Mode) {
   const spec = MODE_SPECS[mode];
   const shape: Record<string, z.ZodType> = {
-    prompt: spec.promptRequired ? z.string().trim().min(1, "Prompt is required") : z.string().trim().optional(),
+    prompt: spec.promptRequired
+      ? z.string({ error: "Prompt is required" }).trim().min(1, "Prompt is required")
+      : z.string().trim().optional(),
     resolution: z.enum(RESOLUTIONS).default("720p"),
     bitrate_mode: z.enum(BITRATE_MODES).default("high"),
     generate_audio: z.boolean().default(true),

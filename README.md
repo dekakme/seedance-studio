@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Seedance Studio
 
-## Getting Started
+Private web app for generating ByteDance **Seedance 2.5** videos through the
+[Higgsfield API](https://docs.higgsfield.ai): text → video, image → video,
+reference → video, video edit and video extend.
 
-First, run the development server:
+## Setup
 
 ```bash
+npm install
+cp .env.example .env.local   # then fill in the values
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 and sign in with `APP_PASSWORD`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Purpose |
+|----------|---------|
+| `HF_CREDENTIALS` | Higgsfield API key as `key-id:key-secret` ([console](https://console.higgsfield.ai)) |
+| `APP_PASSWORD` | Shared password for the login page |
+| `SESSION_SECRET` | ≥32 random characters used to sign the session cookie |
+| `DB_PATH` | Optional, defaults to `data/app.db` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Credentials stay on the server: the browser only talks to this app's `/api/*` routes.
 
-## Learn More
+## How it works
 
-To learn more about Next.js, take a look at the following resources:
+- `POST /api/jobs` validates the input per mode (`lib/schemas.ts`), submits it to
+  Higgsfield and stores the `request_id` in SQLite. A `client_token` per submit
+  makes double clicks and retries return the same job instead of paying twice.
+- The gallery polls `GET /api/jobs/:id` (2 s → 10 s backoff with jitter). Each poll
+  refreshes status from Higgsfield; jobs still running after 60 minutes are marked
+  as timed out. Finished videos are downloaded to `storage/videos/`.
+- Uploaded images, videos and audio go through `POST /api/uploads` to Higgsfield
+  storage, and their public URLs are passed to the model.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Costs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Every generation is billed by Higgsfield. Seedance 2.5 at 480p/720p costs about
+$0.0214 per 1,000 video tokens. That is roughly $0.82 for 4 s at 480p and $2.31
+for 5 s at 720p (16:9).
 
-## Deploy on Vercel
+## Data
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Jobs: SQLite at `data/app.db`
+- Finished videos: `storage/videos/`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Both folders are gitignored. Back them up if you want to keep the history.
+
+## Scripts
+
+- `npm test`: unit tests (Vitest)
+- `npm run typecheck`
+- `npm run example`: one-off SDK example (`index.ts`); makes a billable request
+- `npm run build && npm start`: production

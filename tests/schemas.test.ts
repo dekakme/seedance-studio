@@ -24,7 +24,7 @@ describe("parseJobInput", () => {
   });
 
   it("requires a prompt for text", () => {
-    expect(errorPaths(parseJobInput("text", {}))).toContain("prompt");
+    expect(parseJobInput("text", {})).toEqual({ ok: false, errors: [{ path: "prompt", message: "Prompt is required" }] });
   });
 
   it("rejects durations outside 4-30", () => {

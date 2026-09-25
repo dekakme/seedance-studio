@@ -36,9 +36,23 @@ describe("higgsfield client", () => {
     });
   });
 
+  it("follows status urls on other Higgsfield hosts", async () => {
+    const f = mockFetch(json({ status: "in_progress", request_id: "r1" }));
+    await expect(client(f).getStatus("https://platform.higgsfield.ai/requests/r1/status")).resolves.toMatchObject({
+      status: "in_progress",
+    });
+  });
+
   it("refuses to send the key to a non-Higgsfield url", async () => {
     const f = mockFetch();
-    await expect(client(f).getStatus("https://evil.example.com/requests/r1/status")).rejects.toThrow(/non-Higgsfield/);
+    const c = client(f);
+    for (const url of [
+      "https://evil.example.com/requests/r1/status",
+      "https://higgsfield.ai.evil.com/requests/r1/status",
+      "http://platform.higgsfield.ai/requests/r1/status",
+    ]) {
+      await expect(c.getStatus(url)).rejects.toThrow(/non-Higgsfield/);
+    }
     expect(f).not.toHaveBeenCalled();
   });
 

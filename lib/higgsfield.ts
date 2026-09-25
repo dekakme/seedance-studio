@@ -58,6 +58,17 @@ interface RawStatus {
   error?: string | null;
 }
 
+/** status_url/cancel_url may point at other Higgsfield hosts (e.g. platform.higgsfield.ai). */
+function isHiggsfieldUrl(url: string, baseUrl: string): boolean {
+  if (url.startsWith(`${baseUrl}/`)) return true;
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === "https:" && (hostname === "higgsfield.ai" || hostname.endsWith(".higgsfield.ai"));
+  } catch {
+    return false;
+  }
+}
+
 async function readDetail(res: Response): Promise<string> {
   const text = await res.text().catch(() => "");
   try {
@@ -80,7 +91,7 @@ export function createHiggsfieldClient(opts: ClientOptions): HiggsfieldClient {
   const authorization = `Key ${opts.keyId}:${opts.keySecret}`;
 
   async function call(url: string, method: string, body?: unknown): Promise<Response> {
-    if (!url.startsWith(`${baseUrl}/`)) throw new Error(`Refusing to call non-Higgsfield URL: ${url}`);
+    if (!isHiggsfieldUrl(url, baseUrl)) throw new Error(`Refusing to call non-Higgsfield URL: ${url}`);
     try {
       return await doFetch(url, {
         method,
